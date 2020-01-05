@@ -1,0 +1,23 @@
+@font-face {
+    font-family:"Pixel NES";
+    src:url("font/Pixel_NES.eot?") format("eot"),
+        url("font/Pixel_NES.otf") format("otf"),
+        url("font/Pixel_NES.ttf") format("truetype"),
+        url("font/Pixel_NES.svg#PixelNES") format("svg"),
+        url("font/Pixel_NES.woff") format("woff");
+    font-weight:normal;
+    font-style:normal;
+}
+p {
+    font-family: "Pixel NES";
+    font-size: 8px;
+}
+.container {
+    position: relative;
+}
+#text {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    z-index: 10;
+}

@@ -1,0 +1,21 @@
+{
+  "name": "webgl-breakout",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build-dev": "webpack --mode=development src/index.js -o dist/bundle.js",
+    "build": "webpack src/index.js -o dist/bundle.js",
+    "start": "live-server"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "gl-matrix": "^3.1.0"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "webpack": "^4.41.5",
+    "webpack-cli": "^3.3.10"
+  }
+}
