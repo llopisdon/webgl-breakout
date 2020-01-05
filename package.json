@@ -2,10 +2,10 @@
   "name": "webgl-breakout",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
-    "build-dev": "webpack --mode=development src/index.js -o dist/bundle.js",
-    "build": "webpack src/index.js -o dist/bundle.js",
+    "build-dev": "webpack --mode=development src/main.js -o dist/bundle.js",
+    "build": "webpack src/main.js -o dist/bundle.js",
     "start": "live-server"
   },
   "author": "",
