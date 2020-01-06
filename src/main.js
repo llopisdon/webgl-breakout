@@ -4,9 +4,7 @@ import { mat4 } from "gl-matrix";
 const GAME_WIDTH = 256;
 const GAME_HEIGHT = 240;
 
-
 console.log(">>> init main.js <<<");
-
 
 
 // https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Basic_usage
@@ -182,11 +180,11 @@ function setup() {
         let program = initShaderProgram(gl, vsSource, fsSource);
 
         shaders['program1'] = {
-            'program': program,
-            'attribs': {
+            program: program,
+            attribs: {
                 'a_coords': gl.getAttribLocation(program, 'a_coords'),
             },
-            'uniforms': {
+            uniforms: {
                 'u_modelviewProjection': gl.getUniformLocation(program, 'u_modelviewProjection'),
                 'u_Scale': gl.getUniformLocation(program, 'u_Scale'),
                 'u_Translate': gl.getUniformLocation(program, 'u_Translate'),
@@ -455,6 +453,12 @@ function doGameOver() {
 function doGame() {
     // TODO
 
+    checkForBrickCollisions();
+    movePlayer();
+    moveBall();
+
+    updateGameState();
+
     //
     // check for quit
     //
@@ -464,7 +468,29 @@ function doGame() {
 
     }
 
-    // draw bricks
+    drawBricks();
+    drawPlayerPaddle();
+    drawBall();
+}
+
+function checkForBrickCollisions() {
+    // TODO
+}
+
+function movePlayer() {
+    // TODO
+}
+
+function moveBall() {
+    // TODO
+}
+
+function updateGameState() {
+    // check for next level
+    // check for game over
+}
+
+function drawBricks() {
     for (let brick=0, x=BRICK_START_X; brick<MAX_BRICKS_PER_ROW; brick++, x+=BRICK_WIDTH) {
         // TODO draw rows of bricks
         if (bricks.row1[brick]) {
@@ -493,12 +519,7 @@ function doGame() {
 
         x += BRICK_WIDTH;
     }
-
-    // draw player paddle
-
-    // draw player ball
 }
-
 
 /*
 moutain mist (silver-gray) / border and numbers
@@ -527,6 +548,13 @@ function drawBrick(centerX, centerY, color) {
     // TODO
 }
 
+function drawPlayerPaddle() {
+    // TODO
+}
+
+function drawBall() {
+    // TODO
+}
 
 function drawBackground() {
     //
@@ -540,7 +568,7 @@ function drawBackground() {
     //
 
     gl.uniformMatrix4fv(
-        shaders['program1']['uniforms']['u_modelviewProjection'],
+        shaders['program1'].uniforms['u_modelviewProjection'],
         false,
         normalizedModelViewProjection
     );    
@@ -549,21 +577,21 @@ function drawBackground() {
 
     mat4.identity(modelScale);
     gl.uniformMatrix4fv(
-        shaders['program1']['uniforms']['u_Scale'],
+        shaders['program1'].uniforms['u_Scale'],
         false,
         modelScale
     );
 
     mat4.identity(modelTranslate);
     gl.uniformMatrix4fv(
-        shaders['program1']['uniforms']['u_Translate'],
+        shaders['program1'].uniforms['u_Translate'],
         false,
         modelTranslate
     );
 
     gl.bindBuffer(gl.ARRAY_BUFFER, buffers['2x2_rect'].buffer);
     gl.vertexAttribPointer(
-        shaders['program1']['attribs']['a_coords'],
+        shaders['program1'].attribs['a_coords'],
         buffers['2x2_rect'].size,
         gl.FLOAT,
         false,
@@ -572,7 +600,7 @@ function drawBackground() {
     );
     gl.enableVertexAttribArray(shaders['program1']['attribs']['a_coords']);
 
-    gl.uniform4f(shaders['program1']['uniforms']['u_color'], 0, 0, 0, 1);
+    gl.uniform4f(shaders['program1'].uniforms['u_color'], 0, 0, 0, 1);
 
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, buffers['2x2_rect'].count);
 }
