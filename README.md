@@ -18,3 +18,4 @@ https://llopisdon.github.io/webgl-breakout
 - [Pixel NES Font](http://www.pixelsagas.com/?download=pixel-emulator)
 - [Visual Studio Code](https://code.visualstudio.com/)
 - https://en.wikipedia.org/wiki/Breakout_(video_game)
+- https://strategywiki.org/wiki/Breakout_(Atari_2600)

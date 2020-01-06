@@ -7,28 +7,6 @@ const GAME_HEIGHT = 240;
 
 console.log(">>> init main.js <<<");
 
-/*
-moutain mist (silver-gray) / border and numbers
-rgb(142, 142, 142)
-
-chestnut (red) / paddle / ball / row 6 bricks
-rgb(200, 72, 72)
-
-piper (red-orange) / row 5 bricks
-rgb(198, 108, 58)
-
-mandalay (carmel) / row 4 bricks
-rgb(180, 122, 48)
-
-citron (yellow) / row 3 bricks
-rgb(162, 162, 42)
-
-apple (green) / row 2 bricks
-rgb(72, 160, 72)
-
-cerulean blue / row 1 bricks
-rgb(66, 72, 200)
-*/
 
 
 // https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Basic_usage
@@ -490,27 +468,27 @@ function doGame() {
     for (let brick=0, x=BRICK_START_X; brick<MAX_BRICKS_PER_ROW; brick++, x+=BRICK_WIDTH) {
         // TODO draw rows of bricks
         if (bricks.row1[brick]) {
-            drawBrick(x, BRICK_START_Y);
+            drawBrick(x, BRICK_START_Y, "#c66c3a");
         }
 
         if (bricks.row2[brick]) {
-            drawBrick(x, BRICK_START_Y + BRICK_HEIGHT);
+            drawBrick(x, BRICK_START_Y + BRICK_HEIGHT, "#c66c3a");
         }
 
         if (bricks.row3[brick]) {
-            drawBrick(x, BRICK_START_Y + BRICK_HEIGHT * 2);
+            drawBrick(x, BRICK_START_Y + BRICK_HEIGHT * 2, "#b47a30");
         }
 
         if (bricks.row4[brick]) {
-            drawBrick(x, BRICK_START_Y + BRICK_HEIGHT * 3);
+            drawBrick(x, BRICK_START_Y + BRICK_HEIGHT * 3, "#a2a22a");
         }
     
         if (bricks.row5[brick]) {
-            drawBrick(x, BRICK_START_Y + BRICK_HEIGHT * 4);
+            drawBrick(x, BRICK_START_Y + BRICK_HEIGHT * 4, "#48a048");
         }
 
         if (bricks.row6[brick]) {
-            drawBrick(x, BRICK_START_Y + BRICK_HEIGHT * 5);
+            drawBrick(x, BRICK_START_Y + BRICK_HEIGHT * 5, "#4248c8");
         }
 
         x += BRICK_WIDTH;
@@ -522,7 +500,30 @@ function doGame() {
 }
 
 
-function drawBrick(x, y) {
+/*
+moutain mist (silver-gray) / border and numbers
+#8e8e8e
+
+chestnut (red) / paddle / ball / row 6 bricks
+#c84848
+
+piper (red-orange) / row 5 bricks
+#c66c3a
+
+mandalay (carmel) / row 4 bricks
+#b47a30
+
+citron (yellow) / row 3 bricks
+#a2a22a
+
+apple (green) / row 2 bricks
+#48a048
+
+cerulean blue / row 1 bricks
+#4248c8
+*/
+
+function drawBrick(centerX, centerY, color) {
     // TODO
 }
 
