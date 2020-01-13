@@ -261,15 +261,15 @@ function reset() {
 
     DEBUG_MODE = false;
 
-    paddle.xPos = 0.0 - gl.canvas.clientWidth / 2.0 + 20;
-    paddle.yPos = 0.0;
-    paddle.prevXPos = 0.0;
-    paddle.prevYPos = 0.0;
+    paddle.xPos = 0.0;
+    paddle.yPos = 0.0 - gl.canvas.clientHeight / 2.0 + BRICK_HEIGHT;
+    paddle.prevXPos = paddle.xPos;
+    paddle.prevYPos = paddle.yPos;
 
-    ball.xPos = 0.0;
-    ball.yPos = 0.0;
-    ball.prevXPos = 0.0;
-    ball.prevYPos = 0.0;
+    ball.xPos = paddle.xPos;
+    ball.yPos = paddle.yPos + PADDLE_HEIGHT;
+    ball.prevXPos = ball.xPos;
+    ball.prevYPos = ball.yPos;
 
     for (let brick=0; brick<MAX_BRICKS_PER_ROW; brick++) {
         bricks.row1[brick] = true;
@@ -280,37 +280,42 @@ function reset() {
         bricks.row6[brick] = true;
     }
 
+    MAX_PADDLE_X = 0 + gl.canvas.clientWidth / 2.0 - (PADDLE_WIDTH / 2.0);
     MAX_PADDLE_Y = 0 + gl.canvas.clientHeight / 2.0 - (PADDLE_HEIGHT / 2.0);
     MAX_BALL_X = 0 + gl.canvas.clientWidth / 2.0 - (BALL_RADIUS / 2.0);
     MAX_BALL_Y = 0 + gl.canvas.clientHeight / 2.0 - (BALL_RADIUS / 2.0);
+
+    BRICK_START_X = -gl.canvas.clientWidth / 2.0 + (BRICK_WIDTH / 2.0);
+    BRICK_START_Y = 0.0 + (BRICK_HEIGHT / 2.0) + BRICK_HEIGHT;
 
     gameTimer = 0;
     blink = BLINK_RATE;
 }
 
 const PADDLE_SPEED = 180.0;
-const PADDLE_WIDTH = 10.0;
-const PADDLE_HEIGHT = 60.0;
+const PADDLE_WIDTH = 40.0;
+const PADDLE_HEIGHT = 5.0;
 const PADDLE_HALF_HEIGHT = PADDLE_HEIGHT / 2.0;
 const PADDLE_HALF_WIDTH = PADDLE_WIDTH / 2.0;
-const BALL_RADIUS = PADDLE_WIDTH;
+const BALL_RADIUS = PADDLE_HEIGHT;
 const BALL_HALF_RADIUS = BALL_RADIUS / 2.0;
 
 const DIVIDER_WIDTH = 5.0;
 const DIVIDER_HEIGHT = 10.0;
 const DIVIDER_START_Y = (GAME_HEIGHT / 2.0) - (DIVIDER_HEIGHT / 2.0) - (DIVIDER_HEIGHT / 2.0);
 
-let MAX_PADDLE_Y = 0;
-let MAX_BALL_X = 0;
-let MAX_BALL_Y = 0;
+let MAX_PADDLE_X = 0.0;
+let MAX_PADDLE_Y = 0.0;
+let MAX_BALL_X = 0.0;
+let MAX_BALL_Y = 0.0;
 
 let NUM_BRICK_ROWS = 6;
 let MAX_BRICKS_PER_ROW = 16;
 
 let BRICK_START_X = 0.0;
 let BRICK_START_Y = 0.0;
-let BRICK_WIDTH = 0.0;
-let BRICK_HEIGHT = 0.0;
+let BRICK_WIDTH = 16.0;
+let BRICK_HEIGHT = 10.0;
 
 let paddle = {
     xPos: 0.0,
@@ -351,6 +356,18 @@ const GAME_STATE_PLAY = 2;
 const GAME_STATE_GAME_OVER = 3;
 
 let gameState = GAME_STATE_MAIN_MENU;
+
+const COLORS = {
+    silver: [0.557, 0.557, 0.557, 1.0],
+    red: [0.867, 0.133, 0.275, 1.0],
+    orange: [0.839, 0.388, 0.212, 1.0],
+    carmel: [0.745, 0.475, 0.169, 1.0],
+    yellow: [0.616, 0.671, 0.129, 1.0],
+    green: [0.000, 0.678, 0.271, 1.0],
+    blue: [0.329, 0.000, 0.792, 1.0],
+    cyan: [1.0, 0.0, 1.0, 1.0],
+};
+
 
 function update(timestamp) {
     
@@ -467,8 +484,17 @@ function doGame() {
     if (keys[KEY_Q]) {
         reset();
         gameState = GAME_STATE_MAIN_MENU;
-
     }
+
+    drawBackground();
+
+    gl.useProgram(shaders['program1'].program);
+
+    gl.uniformMatrix4fv(
+        shaders['program1'].uniforms['u_modelviewProjection'],
+        false,
+        modelViewProjection
+    );
 
     drawBricks();
     drawPlayerPaddle();
@@ -480,82 +506,154 @@ function checkForBrickCollisions() {
 }
 
 function movePlayer() {
-    // TODO
+    paddle.prevXPos = paddle.xPos;
+    paddle.prevYPos = paddle.yPos;
+
+    if (keys[KEY_ARROW_RIGHT]) {
+        paddle.dir = 1.0;    
+    } else if (keys[KEY_ARROW_LEFT]) {
+        paddle.dir = -1.0;
+    } else {
+        paddle.dir = 0.0;
+    }
+    
+    paddle.xPos = paddle.xPos + (paddle.dir * PADDLE_SPEED * dt);
+
+    if (paddle.xPos < -MAX_PADDLE_X) {
+        paddle.xPos = -MAX_PADDLE_X;
+    }
+    else if (paddle.xPos > MAX_PADDLE_X) {
+        paddle.xPos = MAX_PADDLE_X;
+    }
 }
 
 function moveBall() {
-    // TODO
+    if (gameState === GAME_STATE_PLAY) {
+        ball.prevXPos = ball.xPos;
+        ball.prevYPos = ball.yPos;
+    
+        ball.xPos = ball.xPos + (ball.xDir * PADDLE_SPEED * dt);
+        ball.yPos = ball.yPos + (ball.yDir * PADDLE_SPEED * dt);
+
+        if (ballXPos < -MAX_BALL_X) {
+            ballXPos = -MAX_BALL_X;
+            ballXDir = -ballXDir;
+            player2Score++;
+            playerScored = true;
+        }
+        else if (ballXPos > MAX_BALL_X) {
+            ballXPos = MAX_BALL_X;
+            ballXDir = -ballXDir;
+            player1Score++;
+            playerScored = true;
+        }
+    
+        
+        if (ballYPos < -MAX_BALL_Y) {
+            ballYPos = -MAX_BALL_Y;
+            ballYDir = -ballYDir;
+        }
+        else if (ballYPos > MAX_BALL_Y) {
+            ballYPos = MAX_BALL_Y;
+            ballYDir = -ballYDir;
+        }    
+    } else if (gameState == GAME_STATE_START) {
+        ball.prevXPos = ball.xPos;
+        ball.prevYPos = ball.yPos;
+        ball.xPos = paddle.xPos;
+        ball.yPos = ball.yPos;
+    }
 }
 
 function updateGameState() {
     // check for next level
     // check for game over
+
+
+
+
+
 }
 
 function drawBricks() {
     for (let brick=0, x=BRICK_START_X; brick<MAX_BRICKS_PER_ROW; brick++, x+=BRICK_WIDTH) {
-        // TODO draw rows of bricks
         if (bricks.row1[brick]) {
-            drawBrick(x, BRICK_START_Y, "#c66c3a");
+            drawBrick(x, BRICK_START_Y, COLORS.blue);
         }
 
         if (bricks.row2[brick]) {
-            drawBrick(x, BRICK_START_Y + BRICK_HEIGHT, "#c66c3a");
+            drawBrick(x, BRICK_START_Y + BRICK_HEIGHT, COLORS.green);
         }
 
         if (bricks.row3[brick]) {
-            drawBrick(x, BRICK_START_Y + BRICK_HEIGHT * 2, "#b47a30");
+            drawBrick(x, BRICK_START_Y + BRICK_HEIGHT * 2, COLORS.yellow);
         }
 
         if (bricks.row4[brick]) {
-            drawBrick(x, BRICK_START_Y + BRICK_HEIGHT * 3, "#a2a22a");
+            drawBrick(x, BRICK_START_Y + BRICK_HEIGHT * 3, COLORS.carmel);
         }
     
         if (bricks.row5[brick]) {
-            drawBrick(x, BRICK_START_Y + BRICK_HEIGHT * 4, "#48a048");
+            drawBrick(x, BRICK_START_Y + BRICK_HEIGHT * 4, COLORS.orange);
         }
 
         if (bricks.row6[brick]) {
-            drawBrick(x, BRICK_START_Y + BRICK_HEIGHT * 5, "#4248c8");
+            drawBrick(x, BRICK_START_Y + BRICK_HEIGHT * 5, COLORS.red);
         }
-
-        x += BRICK_WIDTH;
     }
 }
 
-/*
-moutain mist (silver-gray) / border and numbers
-#8e8e8e
-
-chestnut (red) / paddle / ball / row 6 bricks
-#c84848
-
-piper (red-orange) / row 5 bricks
-#c66c3a
-
-mandalay (carmel) / row 4 bricks
-#b47a30
-
-citron (yellow) / row 3 bricks
-#a2a22a
-
-apple (green) / row 2 bricks
-#48a048
-
-cerulean blue / row 1 bricks
-#4248c8
-*/
 
 function drawBrick(centerX, centerY, color) {
-    // TODO
+
+    drawRect(centerX, centerY, BRICK_WIDTH, BRICK_HEIGHT, color);
 }
 
-function drawPlayerPaddle() {
-    // TODO
+function drawPlayerPaddle(color) {
+    drawRect(paddle.xPos, paddle.yPos, PADDLE_WIDTH, PADDLE_HEIGHT, COLORS.red);
 }
 
 function drawBall() {
-    // TODO
+    drawRect(ball.xPos, ball.yPos, BALL_RADIUS, BALL_RADIUS, COLORS.cyan);
+}
+
+function drawRect(xPos, yPos, width, height, color) {
+    mat4.identity(modelScale);
+    mat4.scale(modelScale,
+        modelScale,
+        [width, height, 0]);
+
+    gl.uniformMatrix4fv(
+        shaders['program1'].uniforms['u_Scale'],
+        false,
+        modelScale
+    );
+
+    mat4.identity(modelTranslate);
+    mat4.translate(modelTranslate,
+        modelTranslate,
+        [xPos, yPos, 0.0]);
+
+    gl.uniformMatrix4fv(
+        shaders['program1'].uniforms['u_Translate'],
+        false,
+        modelTranslate
+    );
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffers['unit_square'].buffer);
+    gl.vertexAttribPointer(
+        shaders['program1'].attribs['a_coords'],
+        buffers['unit_square'].size,
+        gl.FLOAT,
+        false,
+        0,
+        0
+    );
+    gl.enableVertexAttribArray(shaders['program1'].attribs['a_coords']);
+
+    gl.uniform4f(shaders['program1'].uniforms['u_color'], color[0], color[1], color[2], color[3]);
+
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, buffers['unit_square'].count);
 }
 
 function drawBackground() {
@@ -600,7 +698,7 @@ function drawBackground() {
         0,
         0
     );
-    gl.enableVertexAttribArray(shaders['program1']['attribs']['a_coords']);
+    gl.enableVertexAttribArray(shaders['program1'].attribs['a_coords']);
 
     gl.uniform4f(shaders['program1'].uniforms['u_color'], 0, 0, 0, 1);
 
