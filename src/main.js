@@ -535,27 +535,22 @@ function moveBall() {
         ball.xPos = ball.xPos + (ball.xDir * PADDLE_SPEED * dt);
         ball.yPos = ball.yPos + (ball.yDir * PADDLE_SPEED * dt);
 
-        if (ballXPos < -MAX_BALL_X) {
-            ballXPos = -MAX_BALL_X;
-            ballXDir = -ballXDir;
-            player2Score++;
-            playerScored = true;
+        if (ball.xPos < -MAX_BALL_X) {
+            ball.xPos = -MAX_BALL_X;
+            ball.xDir = -ball.xDir;
         }
-        else if (ballXPos > MAX_BALL_X) {
-            ballXPos = MAX_BALL_X;
-            ballXDir = -ballXDir;
-            player1Score++;
-            playerScored = true;
+        else if (ball.xPos > MAX_BALL_X) {
+            ball.xPos = MAX_BALL_X;
+            ball.xDir = -ball.xDir;
         }
     
-        
-        if (ballYPos < -MAX_BALL_Y) {
-            ballYPos = -MAX_BALL_Y;
-            ballYDir = -ballYDir;
+        if (ball.yPos < -MAX_BALL_Y) {
+            ball.yPos = -MAX_BALL_Y;
+            ball.yDir = -ball.yDir;
         }
-        else if (ballYPos > MAX_BALL_Y) {
-            ballYPos = MAX_BALL_Y;
-            ballYDir = -ballYDir;
+        else if (ball.yPos > MAX_BALL_Y) {
+            ball.yPos = MAX_BALL_Y;
+            ball.yDir = -ball.yDir;
         }    
     } else if (gameState == GAME_STATE_START) {
         ball.prevXPos = ball.xPos;
@@ -568,11 +563,6 @@ function moveBall() {
 function updateGameState() {
     // check for next level
     // check for game over
-
-
-
-
-
 }
 
 function drawBricks() {
@@ -603,13 +593,11 @@ function drawBricks() {
     }
 }
 
-
 function drawBrick(centerX, centerY, color) {
-
     drawRect(centerX, centerY, BRICK_WIDTH, BRICK_HEIGHT, color);
 }
 
-function drawPlayerPaddle(color) {
+function drawPlayerPaddle() {
     drawRect(paddle.xPos, paddle.yPos, PADDLE_WIDTH, PADDLE_HEIGHT, COLORS.red);
 }
 
@@ -617,6 +605,14 @@ function drawBall() {
     drawRect(ball.xPos, ball.yPos, BALL_RADIUS, BALL_RADIUS, COLORS.cyan);
 }
 
+/** 
+ * draw rectangle 
+ * @param {number} xPos
+ * @param {number} yPos
+ * @param {number} width
+ * @param {number} height
+ * @param {number[]} color
+ */
 function drawRect(xPos, yPos, width, height, color) {
     mat4.identity(modelScale);
     mat4.scale(modelScale,
