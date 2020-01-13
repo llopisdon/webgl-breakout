@@ -13,6 +13,7 @@ https://llopisdon.github.io/webgl-breakout
 - https://webglfundamentals.org/webgl/lessons/webgl-text-canvas2d.html
 - http://learnwebgl.brown37.net/index.html
 - http://paulbourke.net/geometry/pointlineplane/
+- http://www.jeffreythompson.org/collision-detection/
 - https://hacks.mozilla.org/2016/06/webfont-preloading-for-html5-games/
 - [glMatrix](https://github.com/toji/gl-matrix)
 - [Pixel NES Font](http://www.pixelsagas.com/?download=pixel-emulator)

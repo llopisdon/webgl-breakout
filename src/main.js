@@ -6,7 +6,6 @@ const GAME_HEIGHT = 240;
 
 console.log(">>> init main.js <<<");
 
-
 // https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Basic_usage
 /** @type {HTMLCanvasElement} */
 const canvas = document.querySelector("#canvas");
@@ -211,7 +210,7 @@ function setup() {
     // unit triangle
     {
         const R = 1;
-        const PI_OVER_180 = Math.PI / 180;
+        
         let buffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
         gl.bufferData(gl.ARRAY_BUFFER,
@@ -252,6 +251,8 @@ function setup() {
     reset();
 
     requestAnimationFrame(update);
+
+    console.log(">>> webgl-breakout start! <<<");
 }
 
 function reset() {
@@ -338,7 +339,8 @@ let bricks = {
 };
 
 const PI_OVER_2 = Math.PI / 2;
-const DEG_30 = 30 * (Math.PI / 180);
+const PI_OVER_180 = Math.PI / 180;
+const DEG_30 = 30 * PI_OVER_180;
 
 const BLINK_RATE = 0.5;
 let blink = BLINK_RATE;
@@ -605,8 +607,6 @@ function drawBackground() {
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, buffers['2x2_rect'].count);
 }
 
-requestAnimationFrame(setup);
-
 /** @param {WebGLRenderingContext} gl */
 function initShaderProgram(gl, vsSource, fsSource) {
     const vertexShader = loadShader(gl, gl.VERTEX_SHADER, vsSource);
@@ -631,3 +631,5 @@ function loadShader(gl, type, source) {
     }
     return shader;
 }
+
+requestAnimationFrame(setup);
