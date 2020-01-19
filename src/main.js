@@ -319,7 +319,9 @@ let MAX_BRICKS_PER_ROW = 16;
 let BRICK_START_X = 0.0;
 let BRICK_START_Y = 0.0;
 let BRICK_WIDTH = 16.0;
+let BRICK_HALF_WIDTH = BRICK_WIDTH / 2.0;
 let BRICK_HEIGHT = 10.0;
+let BRICK_HALF_HEIGHT = BRICK_HEIGHT / 2.0;
 
 let paddle = {
     xPos: 0.0,
@@ -447,7 +449,7 @@ function getRandomIntInclusive(min, max) {
  * @param {number} x4 
  * @param {number} y4 
  */
-function checkLineSegmentsIntersect(x1, y1, x2, y2, x3, y3, x4, y4) {
+function didLineSegmentsIntersect(x1, y1, x2, y2, x3, y3, x4, y4) {
 
     let x4x3 = x4 - x3;
     let y1y3 = y1 - y3;    
@@ -477,10 +479,10 @@ function checkLineSegmentsIntersect(x1, y1, x2, y2, x3, y3, x4, y4) {
  * @param {number} rect_right 
  * @param {number} rect_bottom 
  */
-function isLineSegmentInRect(x1, y1, x2, y2, rect_top, rect_left, rect_right, rect_bottom) {
+function didLineSegmentIntersectRect(x1, y1, x2, y2, rect_top, rect_left, rect_right, rect_bottom) {
     
     // bottom
-    if (checkLineSegmentsIntersect(
+    if (didLineSegmentsIntersect(
         x1, y1, x2, y2,
         rect_left, rect_bottom, rect_right, rect_bottom,                 
     )) {
@@ -488,7 +490,7 @@ function isLineSegmentInRect(x1, y1, x2, y2, rect_top, rect_left, rect_right, re
     }
     
     // top
-    if (checkLineSegmentsIntersect(
+    if (didLineSegmentsIntersect(
         x1, y1, x2, y2,
         rect_left, rect_top, rect_right, rect_top,
     )) {
@@ -496,7 +498,7 @@ function isLineSegmentInRect(x1, y1, x2, y2, rect_top, rect_left, rect_right, re
     }
     
     // left
-    if (checkLineSegmentsIntersect(
+    if (didLineSegmentsIntersect(
         x1, y1, x2, y2,
         rect_left, rect_top, rect_left, rect_bottom,                 
     )) {
@@ -504,7 +506,7 @@ function isLineSegmentInRect(x1, y1, x2, y2, rect_top, rect_left, rect_right, re
     }
 
     // right
-    if (checkLineSegmentsIntersect(
+    if (didLineSegmentsIntersect(
         x1, y1, x2, y2,
         rect_right, rect_top, rect_right, rect_bottom,                 
     )) {
@@ -561,8 +563,13 @@ function doGame() {
     // TODO
 
     checkForBrickCollisions();
+    checkForPaddleBallCollision();
+    
     movePlayer();
     moveBall();
+
+
+
 
     updateGameState();
 
@@ -593,6 +600,69 @@ function checkForBrickCollisions() {
     // TODO
     // determine direction of ball / up or down figure out direction to
     // iterrate through all the bricks for a particular row
+
+    for (let brick=0, x=BRICK_START_X; brick<MAX_BRICKS_PER_ROW; brick++, x+=BRICK_WIDTH) {
+        if (bricks.row1[brick]) {
+            checkForBrickCollision(bricks.row1, brick, x, BRICK_START_Y);
+        }
+        if (bricks.row2[brick]) {
+            checkForBrickCollision(bricks.row2, brick, x, BRICK_START_Y + BRICK_HEIGHT);
+        }
+
+        if (bricks.row3[brick]) {
+            checkForBrickCollision(bricks.row3, brick, x, BRICK_START_Y + BRICK_HEIGHT * 2);
+        }
+
+        if (bricks.row4[brick]) {
+            checkForBrickCollision(bricks.row4, brick, x, BRICK_START_Y + BRICK_HEIGHT * 3);
+        }
+    
+        if (bricks.row5[brick]) {
+            checkForBrickCollision(bricks.row5, brick, x, BRICK_START_Y + BRICK_HEIGHT * 4);
+        }
+
+        if (bricks.row6[brick]) {
+            checkForBrickCollision(bricks.row6, brick, x, BRICK_START_Y + BRICK_HEIGHT * 5);
+        }
+    }
+}
+
+function checkForBrickCollision(bricks, brick, x, y) {
+
+    //drawRect(centerX, centerY, BRICK_WIDTH, BRICK_HEIGHT, color);
+
+    if (didLineSegmentIntersectRect(
+        ball.prevXPos, ball.prevYPos,
+        ball.xPos, ball.yPos,
+        y+BRICK_HALF_HEIGHT, x-BRICK_HALF_WIDTH, 
+        x+BRICK_HALF_WIDTH, y-BRICK_HALF_HEIGHT        
+    )) {
+        bricks[brick] = false;
+        ball.xDir *= -1;
+        ball.yDir *= -1;
+    }
+
+
+}
+
+function checkForPaddleBallCollision() {
+    if (didLineSegmentsIntersect(
+        paddle.prevXPos-PADDLE_HALF_WIDTH, paddle.prevYPos,
+        paddle.xPos+PADDLE_HALF_WIDTH, paddle.yPos,
+        ball.prevXPos, ball.prevYPos,
+        ball.xPos, ball.yPos
+    )) {
+        if (keys[KEY_ARROW_LEFT]) {
+            ball.xDir = -1;
+        } else if (keys[KEY_ARROW_RIGHT]) {
+            ball.xDir = 1;
+        }
+
+        ball.yDir *= -1;
+
+        ball.yPos = paddle.yPos + PADDLE_HEIGHT;
+        ball.prevYPos = ball.yPos;
+    }
 }
 
 function movePlayer() {
