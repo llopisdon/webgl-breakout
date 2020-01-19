@@ -132,6 +132,10 @@ function setup() {
     START_TEXT_OFFSET = ctx.measureText(START_TEXT).width / 2;
     TITLE_TEXT_OFFSET = ctx.measureText(TITLE_TEXT).width / 2;
 
+
+    console.log(`start-text offset: ${START_TEXT_OFFSET}`);
+    console.log(`title-text offset: ${TITLE_TEXT_OFFSET}`);
+
     //
     // webgl init
     //
@@ -531,6 +535,8 @@ function doMainMenu() {
 
     ctx.fillText(TITLE_TEXT, TEXT_CENTER_X-TITLE_TEXT_OFFSET, TEXT_TOP + PADDING_16);
 
+    console.log(`doMainMenu -> text center: ${TEXT_CENTER_X} text offset: ${TITLE_TEXT_OFFSET}`);
+
     blink -= dt;
     if (blink > 0.0) {
         ctx.fillText(START_TEXT, TEXT_CENTER_X-START_TEXT_OFFSET, TEXT_CENTER_Y);
@@ -609,6 +615,13 @@ function movePlayer() {
     else if (paddle.xPos > MAX_PADDLE_X) {
         paddle.xPos = MAX_PADDLE_X;
     }
+
+    if (gameState === GAME_STATE_START && keys[KEY_SPACE]) {
+        gameState = GAME_STATE_PLAY;
+        ball.xDir = 1.0;
+        ball.yDir = 1.0;
+    }
+
 }
 
 function moveBall() {
@@ -810,4 +823,6 @@ function loadShader(gl, type, source) {
     return shader;
 }
 
-requestAnimationFrame(setup);
+document.onreadystatechange = () => {
+    requestAnimationFrame(setup);
+}
