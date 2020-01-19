@@ -416,7 +416,12 @@ function update(timestamp) {
     requestAnimationFrame(update);
 }
 
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
+/**
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
+ * 
+ * @param {number} min 
+ * @param {number} max 
+ */
 function getRandomIntInclusive(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
@@ -424,8 +429,21 @@ function getRandomIntInclusive(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min; 
 }
 
-// http://paulbourke.net/geometry/pointlineplane/
-function checkIntersectionTwoLines(x1, y1, x2, y2, x3, y3, x4, y4) {
+ 
+/**
+ * 
+ * http://paulbourke.net/geometry/pointlineplane/
+ * 
+ * @param {number} x1 
+ * @param {number} y1 
+ * @param {number} x2 
+ * @param {number} y2 
+ * @param {number} x3 
+ * @param {number} y3 
+ * @param {number} x4 
+ * @param {number} y4 
+ */
+function checkLineSegmentsIntersect(x1, y1, x2, y2, x3, y3, x4, y4) {
 
     let x4x3 = x4 - x3;
     let y1y3 = y1 - y3;    
@@ -443,6 +461,70 @@ function checkIntersectionTwoLines(x1, y1, x2, y2, x3, y3, x4, y4) {
 
     return false;
 }
+
+/**
+ * 
+ * @param {number} x1 
+ * @param {number} y1 
+ * @param {number} x2 
+ * @param {number} y2 
+ * @param {number} rect_top 
+ * @param {number} rect_left 
+ * @param {number} rect_right 
+ * @param {number} rect_bottom 
+ */
+function isLineSegmentInRect(x1, y1, x2, y2, rect_top, rect_left, rect_right, rect_bottom) {
+    
+    // bottom
+    if (checkLineSegmentsIntersect(
+        x1, y1, x2, y2,
+        rect_left, rect_bottom, rect_right, rect_bottom,                 
+    )) {
+        return true;
+    }
+    
+    // top
+    if (checkLineSegmentsIntersect(
+        x1, y1, x2, y2,
+        rect_left, rect_top, rect_right, rect_top,
+    )) {
+        return true;
+    }
+    
+    // left
+    if (checkLineSegmentsIntersect(
+        x1, y1, x2, y2,
+        rect_left, rect_top, rect_left, rect_bottom,                 
+    )) {
+        return true;
+    }
+
+    // right
+    if (checkLineSegmentsIntersect(
+        x1, y1, x2, y2,
+        rect_right, rect_top, rect_right, rect_bottom,                 
+    )) {
+        return true;
+    }
+    
+    return false;
+}
+
+/**
+ * Assumes right-hand 2D coordinate system
+ * 
+ * @param {number} x 
+ * @param {number} y 
+ * @param {number} top 
+ * @param {number} left 
+ * @param {number} right 
+ * @param {number} bottom 
+ */
+function isPointInRect(x, y, top, left, right, bottom) {
+    if (x >= left && x <= right && y <= top && y >= bottom)
+    return false;
+}
+
 
 function doMainMenu() {
     drawBackground();
@@ -503,6 +585,8 @@ function doGame() {
 
 function checkForBrickCollisions() {
     // TODO
+    // determine direction of ball / up or down figure out direction to
+    // iterrate through all the bricks for a particular row
 }
 
 function movePlayer() {

@@ -1,6 +1,6 @@
 WebGL Breakout
 
-A WebGL/HTML5 Breakout Remake.
+A WebGL/HTML5 Breakout Remake. Based on Atari 2600 Breakout.
 
 https://llopisdon.github.io/webgl-breakout
 
@@ -20,3 +20,4 @@ https://llopisdon.github.io/webgl-breakout
 - [Visual Studio Code](https://code.visualstudio.com/)
 - https://en.wikipedia.org/wiki/Breakout_(video_game)
 - https://strategywiki.org/wiki/Breakout_(Atari_2600)
+- [JSDoc](https://jsdoc.app/)
