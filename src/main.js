@@ -128,9 +128,6 @@ let DEBUG_MODE = false;
 const GAME_TIMER_GAME_OVER = 2.0;
 let gameTimer = 0;
 
-let DIGIT_OFFSET = 0;
-
-
 let BALL_DIR_45 = {
     x: Math.cos(Math.PI / 4.0),
     y: Math.sin(Math.PI / 4.0)
@@ -166,7 +163,6 @@ function setup() {
     START_TEXT_OFFSET = ctx.measureText(START_TEXT).width / 2;
     TITLE_TEXT_OFFSET = ctx.measureText(TITLE_TEXT).width / 2;
     GAME_OVER_TEXT_OFFSET = ctx.measureText(GAME_OVER_TEXT).width / 2;
-    DIGIT_OFFSET = ctx.measureText("0").width / 2;
 
     //
     // webgl init
@@ -325,7 +321,12 @@ function resetBricks() {
         bricks[4][brick] = true;
         bricks[5][brick] = true;
     }
+
     curBricksLeft = MAX_BRICKS;
+
+    // reset ball speed vars
+    curHits = 0;
+    curBallSpeed = 0;
 }
 
 function resetKeysAndPaddleAndBall() {
@@ -341,7 +342,18 @@ function resetKeysAndPaddleAndBall() {
     ball.prevYPos = ball.yPos;
 }
 
+
+let BALL_SPEED = [
+    180.0,
+    200.0,
+    220.0,
+    240.0,
+    300.0
+];
+
 const PADDLE_SPEED = 180.0;
+
+
 const PADDLE_WIDTH = 40.0;
 const PADDLE_HEIGHT = 5.0;
 const PADDLE_HALF_HEIGHT = PADDLE_HEIGHT / 2.0;
@@ -444,6 +456,12 @@ let curPoints = 0;
 let curBallsLeft = 0;
 let curLevel = 1;
 let curBricksLeft = 0;
+
+// these two vars control ball speed for each level
+// based on original game play
+// speed increases on: 4th hit, 12th hit, first orange brick hit, and first red brick hit
+let curHits = 0;
+let curBallSpeed = 0;
 
 function update(timestamp) {
 
@@ -692,17 +710,27 @@ function checkForBrickCollisions() {
             if (bricks[row][brick] && checkForBrickCollision(row, brick, x, brickY)) {
                 bricks[row][brick] = false;
                 curBricksLeft--;
+                curHits++;
+                
                 curPoints += POINTS[row];
                 if (curPoints > 9999) {
                     curPoints = 9999;
                 }
-                console.log("curPoints: " + curPoints);
+                
                 if (ball.yDir > 0.0) {
                     ball.yPos = brickY - BRICK_HALF_HEIGHT - PADDLE_HALF_HEIGHT;
                 } else {
                     ball.yPos = brickY + BRICK_HALF_HEIGHT + PADDLE_HALF_HEIGHT;
                 }
                 ball.yDir *= -1;
+
+                console.log("prevBallSpeed: " + curBallSpeed);
+
+                if (curHits === 4 || curHits === 12 || (curBallSpeed < 3 && row === 4) || (curBallSpeed < 4 && row === 5)) {
+                    curBallSpeed++;
+                }
+                console.log("curBallSpeed: " + curBallSpeed);
+
                 return;
             }
         }
@@ -781,8 +809,8 @@ function moveBall() {
         ball.prevXPos = ball.xPos;
         ball.prevYPos = ball.yPos;
 
-        ball.xPos = ball.xPos + (ball.xDir * PADDLE_SPEED * dt);
-        ball.yPos = ball.yPos + (ball.yDir * PADDLE_SPEED * dt);
+        ball.xPos = ball.xPos + (ball.xDir * BALL_SPEED[curBallSpeed] * dt);
+        ball.yPos = ball.yPos + (ball.yDir * BALL_SPEED[curBallSpeed] * dt);
 
         if (ball.xPos < -MAX_BALL_X) {
             ball.xPos = -MAX_BALL_X;
