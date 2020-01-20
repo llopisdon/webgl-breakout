@@ -86,7 +86,7 @@ const GAME_KEYS = [
     KEY_I, KEY_J, KEY_K, KEY_L,
 
     KEY_Z,
-    
+
     KEY_SPACE,
     KEY_Q,
 ];
@@ -95,7 +95,7 @@ let keys = {};
 
 document.addEventListener("keydown", e => {
     console.log(`keydown -> key: ${e.key} code: ${e.code}`);
-    if ( GAME_KEYS.indexOf(e.key) >= 0) {
+    if (GAME_KEYS.indexOf(e.key) >= 0) {
         e.preventDefault();
     }
     keys[e.code] = true;
@@ -129,6 +129,11 @@ let BALL_DIR_45 = {
     y: Math.sin(Math.PI / 4.0)
 };
 
+let BALL_DIR_135 = {
+    x: Math.cos(3 * Math.PI / 4.0),
+    y: Math.sin(3 * Math.PI / 4.0)
+};
+
 let BALL_DIR_90 = {
     x: 0.0,
     y: 1.0
@@ -138,6 +143,12 @@ let BALL_DIR_60 = {
     x: Math.cos(Math.PI / 3.0),
     y: Math.sin(Math.PI / 3.0)
 }
+
+let BALL_DIR_120 = {
+    x: Math.cos(2 * Math.PI / 3.0),
+    y: Math.sin(2 * Math.PI / 3.0)
+}
+
 
 function setup() {
 
@@ -155,7 +166,7 @@ function setup() {
     //
     // webgl init
     //
-    
+
     gl.clearColor(0, 0, 0, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
@@ -188,14 +199,14 @@ function setup() {
             v_color = u_color;
         }
         `;
-    
+
         const fsSource = `
         varying lowp vec4 v_color;
         void main() {
             gl_FragColor = v_color;
         }
         `;
-    
+
         let program = initShaderProgram(gl, vsSource, fsSource);
 
         shaders['program1'] = {
@@ -219,7 +230,7 @@ function setup() {
         gl.bufferData(gl.ARRAY_BUFFER,
             new Float32Array([1, 1, -1, 1, 1, -1, -1, -1]),
             gl.STATIC_DRAW);
-        
+
         buffers['2x2_rect'] = {
             buffer: buffer,
             size: 2,
@@ -230,14 +241,14 @@ function setup() {
     // unit triangle
     {
         const R = 1;
-        
+
         let buffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
         gl.bufferData(gl.ARRAY_BUFFER,
             new Float32Array([
-                R * Math.cos(Math.PI/2), R * Math.sin(Math.PI/2),
-                R * Math.cos(210 * PI_OVER_180), R * Math.sin(210 * PI_OVER_180), 
-                R * Math.cos(330 * PI_OVER_180), R * Math.sin(330 * PI_OVER_180), 
+                R * Math.cos(Math.PI / 2), R * Math.sin(Math.PI / 2),
+                R * Math.cos(210 * PI_OVER_180), R * Math.sin(210 * PI_OVER_180),
+                R * Math.cos(330 * PI_OVER_180), R * Math.sin(330 * PI_OVER_180),
             ]),
             gl.STATIC_DRAW);
         buffers['unit_triangle'] = {
@@ -254,10 +265,10 @@ function setup() {
         gl.bufferData(gl.ARRAY_BUFFER,
             new Float32Array(
                 [
-                  0.5, 0.5,
-                  -0.5, 0.5,
-                  0.5, -0.5,
-                  -0.5, -0.5
+                    0.5, 0.5,
+                    -0.5, 0.5,
+                    0.5, -0.5,
+                    -0.5, -0.5
                 ]
             ),
             gl.STATIC_DRAW);
@@ -291,13 +302,13 @@ function reset() {
     ball.prevXPos = ball.xPos;
     ball.prevYPos = ball.yPos;
 
-    for (let brick=0; brick<MAX_BRICKS_PER_ROW; brick++) {
-        bricks.row1[brick] = true;
-        bricks.row2[brick] = true;
-        bricks.row3[brick] = true;
-        bricks.row4[brick] = true;
-        bricks.row5[brick] = true;
-        bricks.row6[brick] = true;
+    for (let brick = 0; brick < MAX_BRICKS_PER_ROW; brick++) {
+        bricks[0][brick] = true;
+        bricks[1][brick] = true;
+        bricks[2][brick] = true;
+        bricks[3][brick] = true;
+        bricks[4][brick] = true;
+        bricks[5][brick] = true;
     }
 
     MAX_PADDLE_X = 0 + gl.canvas.clientWidth / 2.0 - (PADDLE_WIDTH / 2.0);
@@ -356,14 +367,14 @@ let ball = {
     dirY: 1.0,
 }
 
-let bricks = {
-    row1: new Array(MAX_BRICKS_PER_ROW),
-    row2: new Array(MAX_BRICKS_PER_ROW),
-    row3: new Array(MAX_BRICKS_PER_ROW),
-    row4: new Array(MAX_BRICKS_PER_ROW),
-    row5: new Array(MAX_BRICKS_PER_ROW),
-    row6: new Array(MAX_BRICKS_PER_ROW)
-};
+let bricks = [
+    new Array(MAX_BRICKS_PER_ROW),
+    new Array(MAX_BRICKS_PER_ROW),
+    new Array(MAX_BRICKS_PER_ROW),
+    new Array(MAX_BRICKS_PER_ROW),
+    new Array(MAX_BRICKS_PER_ROW),
+    new Array(MAX_BRICKS_PER_ROW)
+];
 
 const PI_OVER_2 = Math.PI / 2;
 const PI_OVER_180 = Math.PI / 180;
@@ -390,9 +401,30 @@ const COLORS = {
     cyan: [1.0, 0.0, 1.0, 1.0],
 };
 
+let BRICK_COLORS = [
+    COLORS.blue,
+    COLORS.green,
+    COLORS.yellow,
+    COLORS.carmel,
+    COLORS.orange,
+    COLORS.red
+];
+
+let POINTS = [
+    1,
+    1,
+    4,
+    4,
+    7,
+    7
+];
+
+let curPoints = 0;
+let curBalls = 3;
+let curLevel = 1;
 
 function update(timestamp) {
-    
+
     // https://developer.mozilla.org/en-US/docs/Games/Anatomy
     const t = timestamp / 1000;
     dt = t - last;
@@ -412,12 +444,12 @@ function update(timestamp) {
     if (DEBUG_MODE) {
         ctx.fillText(timestamp, TEXT_START, GAME_HEIGHT - PADDING_16 * 2);
         ctx.fillText(dt.toFixed(8), TEXT_START, GAME_HEIGHT - PADDING_8);
-        
+
         ctx.moveTo(TEXT_CENTER_X, 0);
         ctx.lineTo(TEXT_CENTER_X, ctx.canvas.height);
         ctx.moveTo(0, TEXT_CENTER_Y);
         ctx.lineTo(ctx.canvas.width, TEXT_CENTER_Y);
-        ctx.stroke();    
+        ctx.stroke();
     }
 
     switch (gameState) {
@@ -432,9 +464,9 @@ function update(timestamp) {
             doGameOver();
             break;
         default:
-            break;    
+            break;
     }
-   
+
     requestAnimationFrame(update);
 }
 
@@ -448,10 +480,10 @@ function getRandomIntInclusive(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
     //The maximum is inclusive and the minimum is inclusive 
-    return Math.floor(Math.random() * (max - min + 1)) + min; 
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
- 
+
 /**
  * 
  * http://paulbourke.net/geometry/pointlineplane/
@@ -466,9 +498,8 @@ function getRandomIntInclusive(min, max) {
  * @param {number} y4 
  */
 function didLineSegmentsIntersect(x1, y1, x2, y2, x3, y3, x4, y4) {
-
     let x4x3 = x4 - x3;
-    let y1y3 = y1 - y3;    
+    let y1y3 = y1 - y3;
     let y4y3 = y4 - y3;
     let x1x3 = x1 - x3;
     let x2x1 = x2 - x1;
@@ -495,40 +526,44 @@ function didLineSegmentsIntersect(x1, y1, x2, y2, x3, y3, x4, y4) {
  * @param {number} rect_right 
  * @param {number} rect_bottom 
  */
-function didLineSegmentIntersectRect(x1, y1, x2, y2, rect_top, rect_left, rect_right, rect_bottom) {
-    
+function didLineSegmentIntersectRect(x1, y1, x2, y2, rect_left, rect_top, rect_right, rect_bottom) {
+
     // bottom
     if (didLineSegmentsIntersect(
         x1, y1, x2, y2,
-        rect_left, rect_bottom, rect_right, rect_bottom,                 
+        rect_left, rect_bottom, rect_right, rect_bottom,
     )) {
+        console.log("inersect bottom");
         return true;
     }
-    
+
     // top
     if (didLineSegmentsIntersect(
         x1, y1, x2, y2,
         rect_left, rect_top, rect_right, rect_top,
     )) {
+        console.log("inersect top");
         return true;
     }
-    
+
     // left
     if (didLineSegmentsIntersect(
         x1, y1, x2, y2,
-        rect_left, rect_top, rect_left, rect_bottom,                 
+        rect_left, rect_top, rect_left, rect_bottom,
     )) {
+        console.log("inersect left");
         return true;
     }
 
     // right
     if (didLineSegmentsIntersect(
         x1, y1, x2, y2,
-        rect_right, rect_top, rect_right, rect_bottom,                 
+        rect_right, rect_top, rect_right, rect_bottom,
     )) {
+        console.log("inersect right");
         return true;
     }
-    
+
     return false;
 }
 
@@ -544,18 +579,18 @@ function didLineSegmentIntersectRect(x1, y1, x2, y2, rect_top, rect_left, rect_r
  */
 function isPointInRect(x, y, top, left, right, bottom) {
     if (x >= left && x <= right && y <= top && y >= bottom)
-    return false;
+        return false;
 }
 
 
 function doMainMenu() {
     drawBackground();
 
-    ctx.fillText(TITLE_TEXT, TEXT_CENTER_X-TITLE_TEXT_OFFSET, TEXT_TOP + PADDING_16);
+    ctx.fillText(TITLE_TEXT, TEXT_CENTER_X - TITLE_TEXT_OFFSET, TEXT_TOP + PADDING_16);
 
     blink -= dt;
     if (blink > 0.0) {
-        ctx.fillText(START_TEXT, TEXT_CENTER_X-START_TEXT_OFFSET, TEXT_CENTER_Y);
+        ctx.fillText(START_TEXT, TEXT_CENTER_X - START_TEXT_OFFSET, TEXT_CENTER_Y);
     } else if (blink < -BLINK_RATE) {
         blink = BLINK_RATE;
     }
@@ -578,7 +613,7 @@ function doGame() {
 
     checkForBrickCollisions();
     checkForPaddleBallCollision();
-    
+
     movePlayer();
     moveBall();
 
@@ -608,63 +643,56 @@ function doGame() {
 }
 
 function checkForBrickCollisions() {
-    // TODO
-    // determine direction of ball / up or down figure out direction to
-    // iterrate through all the bricks for a particular row
-
-    for (let brick=0, x=BRICK_START_X; brick<MAX_BRICKS_PER_ROW; brick++, x+=BRICK_WIDTH) {
-        if (bricks.row1[brick]) {
-            checkForBrickCollision(bricks.row1, brick, x, BRICK_START_Y);
-        }
-        if (bricks.row2[brick]) {
-            checkForBrickCollision(bricks.row2, brick, x, BRICK_START_Y + BRICK_HEIGHT);
-        }
-
-        if (bricks.row3[brick]) {
-            checkForBrickCollision(bricks.row3, brick, x, BRICK_START_Y + BRICK_HEIGHT * 2);
-        }
-
-        if (bricks.row4[brick]) {
-            checkForBrickCollision(bricks.row4, brick, x, BRICK_START_Y + BRICK_HEIGHT * 3);
-        }
-    
-        if (bricks.row5[brick]) {
-            checkForBrickCollision(bricks.row5, brick, x, BRICK_START_Y + BRICK_HEIGHT * 4);
-        }
-
-        if (bricks.row6[brick]) {
-            checkForBrickCollision(bricks.row6, brick, x, BRICK_START_Y + BRICK_HEIGHT * 5);
+    for (let row=0; row<6; row++) {
+        for (let brick = 0, x = BRICK_START_X; brick < MAX_BRICKS_PER_ROW; brick++ , x += BRICK_WIDTH) {
+            let brickY =  BRICK_START_Y + (BRICK_HEIGHT * row);
+            if (bricks[row][brick] && checkForBrickCollision(row, brick, x, brickY)) {
+                bricks[row][brick] = false;
+                if (ball.yDir > 0.0) {
+                    ball.yPos = brickY - BRICK_HALF_HEIGHT - PADDLE_HALF_HEIGHT;
+                } else {
+                    ball.yPos = brickY + BRICK_HALF_HEIGHT + PADDLE_HALF_HEIGHT;
+                }
+                ball.yDir *= -1;
+                return;
+            }
         }
     }
 }
 
-function checkForBrickCollision(bricks, brick, x, y) {
+function checkForBrickCollision(row, brick, brickX, brickY) {
     if (didLineSegmentIntersectRect(
         ball.prevXPos, ball.prevYPos,
         ball.xPos, ball.yPos,
-        y+BRICK_HALF_HEIGHT, x-BRICK_HALF_WIDTH, 
-        x+BRICK_HALF_WIDTH, y-BRICK_HALF_HEIGHT        
+        brickX - BRICK_HALF_WIDTH, brickY + BRICK_HALF_HEIGHT,
+        brickX + BRICK_HALF_WIDTH, brickY - BRICK_HALF_HEIGHT
     )) {
-        bricks[brick] = false;
-        ball.xDir *= -1;
-        ball.yDir *= -1;
+        return true;
     }
+    return false;
 }
 
 function checkForPaddleBallCollision() {
     if (didLineSegmentsIntersect(
-        paddle.prevXPos-PADDLE_HALF_WIDTH, paddle.prevYPos,
-        paddle.xPos+PADDLE_HALF_WIDTH, paddle.yPos,
+        paddle.prevXPos - PADDLE_HALF_WIDTH, paddle.prevYPos,
+        paddle.xPos + PADDLE_HALF_WIDTH, paddle.yPos,
         ball.prevXPos, ball.prevYPos,
         ball.xPos, ball.yPos
     )) {
         if (keys[KEY_ARROW_LEFT]) {
-            ball.xDir = -1;
+            ball.xDir = BALL_DIR_120.x;
+            ball.yDir = BALL_DIR_120.y;
         } else if (keys[KEY_ARROW_RIGHT]) {
-            ball.xDir = 1;
+            ball.xDir = BALL_DIR_60.x;
+            ball.yDir = BALL_DIR_60.y;
+        } else {
+            if (ball.xDir < 0.0) {
+                ball.xDir = BALL_DIR_135.x;
+            } else {
+                ball.xDir = BALL_DIR_45.x;
+            }
+            ball.yDir = BALL_DIR_45.y;
         }
-
-        ball.yDir *= -1;
 
         ball.yPos = paddle.yPos + PADDLE_HEIGHT;
         ball.prevYPos = ball.yPos;
@@ -676,13 +704,13 @@ function movePlayer() {
     paddle.prevYPos = paddle.yPos;
 
     if (keys[KEY_ARROW_RIGHT]) {
-        paddle.dir = 1.0;    
+        paddle.dir = 1.0;
     } else if (keys[KEY_ARROW_LEFT]) {
         paddle.dir = -1.0;
     } else {
         paddle.dir = 0.0;
     }
-    
+
     paddle.xPos = paddle.xPos + (paddle.dir * PADDLE_SPEED * dt);
 
     if (paddle.xPos < -MAX_PADDLE_X) {
@@ -694,8 +722,8 @@ function movePlayer() {
 
     if (gameState === GAME_STATE_START && keys[KEY_SPACE]) {
         gameState = GAME_STATE_PLAY;
-        ball.xDir = 1.0;
-        ball.yDir = 1.0;
+        ball.xDir = BALL_DIR_90.x;
+        ball.yDir = BALL_DIR_90.y;
     }
 }
 
@@ -703,7 +731,7 @@ function moveBall() {
     if (gameState === GAME_STATE_PLAY) {
         ball.prevXPos = ball.xPos;
         ball.prevYPos = ball.yPos;
-    
+
         ball.xPos = ball.xPos + (ball.xDir * PADDLE_SPEED * dt);
         ball.yPos = ball.yPos + (ball.yDir * PADDLE_SPEED * dt);
 
@@ -715,7 +743,7 @@ function moveBall() {
             ball.xPos = MAX_BALL_X;
             ball.xDir = -ball.xDir;
         }
-    
+
         if (ball.yPos < -MAX_BALL_Y) {
             ball.yPos = -MAX_BALL_Y;
             ball.yDir = -ball.yDir;
@@ -723,7 +751,7 @@ function moveBall() {
         else if (ball.yPos > MAX_BALL_Y) {
             ball.yPos = MAX_BALL_Y;
             ball.yDir = -ball.yDir;
-        }    
+        }
     } else if (gameState == GAME_STATE_START) {
         ball.prevXPos = ball.xPos;
         ball.prevYPos = ball.yPos;
@@ -738,29 +766,11 @@ function updateGameState() {
 }
 
 function drawBricks() {
-    for (let brick=0, x=BRICK_START_X; brick<MAX_BRICKS_PER_ROW; brick++, x+=BRICK_WIDTH) {
-        if (bricks.row1[brick]) {
-            drawBrick(x, BRICK_START_Y, COLORS.blue);
-        }
-
-        if (bricks.row2[brick]) {
-            drawBrick(x, BRICK_START_Y + BRICK_HEIGHT, COLORS.green);
-        }
-
-        if (bricks.row3[brick]) {
-            drawBrick(x, BRICK_START_Y + BRICK_HEIGHT * 2, COLORS.yellow);
-        }
-
-        if (bricks.row4[brick]) {
-            drawBrick(x, BRICK_START_Y + BRICK_HEIGHT * 3, COLORS.carmel);
-        }
-    
-        if (bricks.row5[brick]) {
-            drawBrick(x, BRICK_START_Y + BRICK_HEIGHT * 4, COLORS.orange);
-        }
-
-        if (bricks.row6[brick]) {
-            drawBrick(x, BRICK_START_Y + BRICK_HEIGHT * 5, COLORS.red);
+    for (let row = 0; row < 6; row++) {
+        for (let brick = 0, x = BRICK_START_X; brick < MAX_BRICKS_PER_ROW; brick++ , x += BRICK_WIDTH) {
+            if (bricks[row][brick]) {
+                drawBrick(x, BRICK_START_Y + (BRICK_HEIGHT * row), BRICK_COLORS[row]);
+            }
         }
     }
 }
@@ -839,7 +849,7 @@ function drawBackground() {
         shaders['program1'].uniforms['u_modelviewProjection'],
         false,
         normalizedModelViewProjection
-    );    
+    );
 
     // background
 
