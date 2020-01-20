@@ -123,6 +123,22 @@ let DEBUG_MODE = false;
 const GAME_TIMER_GAME_OVER = 5.0;
 let gameTimer = 0;
 
+
+let BALL_DIR_45 = {
+    x: Math.cos(Math.PI / 4.0),
+    y: Math.sin(Math.PI / 4.0)
+};
+
+let BALL_DIR_90 = {
+    x: 0.0,
+    y: 1.0
+}
+
+let BALL_DIR_60 = {
+    x: Math.cos(Math.PI / 3.0),
+    y: Math.sin(Math.PI / 3.0)
+}
+
 function setup() {
 
     //
@@ -537,8 +553,6 @@ function doMainMenu() {
 
     ctx.fillText(TITLE_TEXT, TEXT_CENTER_X-TITLE_TEXT_OFFSET, TEXT_TOP + PADDING_16);
 
-    console.log(`doMainMenu -> text center: ${TEXT_CENTER_X} text offset: ${TITLE_TEXT_OFFSET}`);
-
     blink -= dt;
     if (blink > 0.0) {
         ctx.fillText(START_TEXT, TEXT_CENTER_X-START_TEXT_OFFSET, TEXT_CENTER_Y);
@@ -567,9 +581,6 @@ function doGame() {
     
     movePlayer();
     moveBall();
-
-
-
 
     updateGameState();
 
@@ -628,9 +639,6 @@ function checkForBrickCollisions() {
 }
 
 function checkForBrickCollision(bricks, brick, x, y) {
-
-    //drawRect(centerX, centerY, BRICK_WIDTH, BRICK_HEIGHT, color);
-
     if (didLineSegmentIntersectRect(
         ball.prevXPos, ball.prevYPos,
         ball.xPos, ball.yPos,
@@ -641,8 +649,6 @@ function checkForBrickCollision(bricks, brick, x, y) {
         ball.xDir *= -1;
         ball.yDir *= -1;
     }
-
-
 }
 
 function checkForPaddleBallCollision() {
@@ -691,7 +697,6 @@ function movePlayer() {
         ball.xDir = 1.0;
         ball.yDir = 1.0;
     }
-
 }
 
 function moveBall() {
