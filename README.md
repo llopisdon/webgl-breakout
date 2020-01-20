@@ -4,6 +4,8 @@ A WebGL/HTML5 Breakout Remake. Based on Atari 2600 Breakout.
 
 https://llopisdon.github.io/webgl-breakout
 
+![screenshot](/res/screenshot.png)
+
 ## Resources
 - https://www.sitepoint.com/premium/books/html5-games-novice-to-ninja/
 - https://developer.mozilla.org/en-US/docs/Games/Anatomy
