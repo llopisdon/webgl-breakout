@@ -337,7 +337,7 @@ function resetKeysAndPaddleAndBall() {
     paddle.prevYPos = paddle.yPos;
 
     ball.xPos = paddle.xPos;
-    ball.yPos = paddle.yPos + PADDLE_HEIGHT;
+    ball.yPos = paddle.yPos + PADDLE_HALF_HEIGHT + BALL_RADIUS;
     ball.prevXPos = ball.xPos;
     ball.prevYPos = ball.yPos;
 }
@@ -358,8 +358,10 @@ const PADDLE_WIDTH = 40.0;
 const PADDLE_HEIGHT = 5.0;
 const PADDLE_HALF_HEIGHT = PADDLE_HEIGHT / 2.0;
 const PADDLE_HALF_WIDTH = PADDLE_WIDTH / 2.0;
-const BALL_RADIUS = PADDLE_HEIGHT;
-const BALL_HALF_RADIUS = BALL_RADIUS / 2.0;
+const BALL_RADIUS = PADDLE_HALF_HEIGHT;
+const BALL_HEIGHT = PADDLE_HEIGHT;
+const BALL_WIDTH = PADDLE_HEIGHT;
+
 
 const DIVIDER_WIDTH = 5.0;
 const DIVIDER_HEIGHT = 10.0;
@@ -557,14 +559,14 @@ function didLineSegmentsIntersect(x1, y1, x2, y2, x3, y3, x4, y4) {
 
 /**
  * 
- * @param {number} x1 
- * @param {number} y1 
- * @param {number} x2 
- * @param {number} y2 
- * @param {number} rect_top 
- * @param {number} rect_left 
- * @param {number} rect_right 
- * @param {number} rect_bottom 
+ * @param {*} x1 
+ * @param {*} y1 
+ * @param {*} x2 
+ * @param {*} y2 
+ * @param {*} rect_left 
+ * @param {*} rect_top 
+ * @param {*} rect_right 
+ * @param {*} rect_bottom 
  */
 function didLineSegmentIntersectRect(x1, y1, x2, y2, rect_left, rect_top, rect_right, rect_bottom) {
 
@@ -604,18 +606,50 @@ function didLineSegmentIntersectRect(x1, y1, x2, y2, rect_left, rect_top, rect_r
 }
 
 /**
- * Assumes right-hand 2D coordinate system
  * 
- * @param {number} x 
- * @param {number} y 
- * @param {number} top 
- * @param {number} left 
- * @param {number} right 
- * @param {number} bottom 
+ * @param {*} x 
+ * @param {*} y 
+ * @param {*} left 
+ * @param {*} top 
+ * @param {*} right 
+ * @param {*} bottom 
  */
-function isPointInRect(x, y, top, left, right, bottom) {
+function isPointInRect(x, y, left, top, right, bottom) {
     if (x >= left && x <= right && y <= top && y >= bottom)
         return false;
+}
+
+
+/**
+ * http://www.jeffreythompson.org/collision-detection/circle-rect.php
+ * 
+ * @param {*} cx 
+ * @param {*} cy 
+ * @param {*} radiusSquared 
+ * @param {*} left 
+ * @param {*} top 
+ * @param {*} right 
+ * @param {*} bottom 
+ */
+function circleIntersectRect(cx, cy, radius, left, top, right, bottom) {
+    let testX = cx;
+    let testY = cy;
+
+    if (cx < left) testX = left;
+    else if (cx > right) testX = right;
+    if (cy < bottom) testY = bottom;
+    else if (cy > top) testY = top;
+
+    let distX = cx - testX;
+    let distY = cy - testY;
+    let dist = Math.sqrt((distX * distX) + (distY * distY));
+    
+    let collision = dist <= radius;
+    let diff = 0.0;
+    if (collision) {
+        diff = Math.abs(dist - radius);
+    }
+    return { collision: collision, diff: diff };
 }
 
 
@@ -738,24 +772,28 @@ function checkForBrickCollisions() {
 }
 
 function checkForBrickCollision(row, brick, brickX, brickY) {
-    if (didLineSegmentIntersectRect(
-        ball.prevXPos, ball.prevYPos,
-        ball.xPos, ball.yPos,
+    let res = circleIntersectRect(
+        ball.xPos,
+        ball.yPos,
+        BALL_RADIUS,
         brickX - BRICK_HALF_WIDTH, brickY + BRICK_HALF_HEIGHT,
         brickX + BRICK_HALF_WIDTH, brickY - BRICK_HALF_HEIGHT
-    )) {
-        return true;
-    }
-    return false;
+    );
+
+    return res.collision;
 }
 
 function checkForPaddleBallCollision() {
-    if (didLineSegmentsIntersect(
-        paddle.prevXPos - PADDLE_HALF_WIDTH, paddle.prevYPos,
-        paddle.xPos + PADDLE_HALF_WIDTH, paddle.yPos,
-        ball.prevXPos, ball.prevYPos,
-        ball.xPos, ball.yPos
-    )) {
+
+    let res = circleIntersectRect(
+        ball.xPos,
+        ball.yPos,
+        BALL_RADIUS,
+        paddle.prevXPos - PADDLE_HALF_WIDTH, paddle.prevYPos + PADDLE_HALF_HEIGHT,
+        paddle.xPos + PADDLE_HALF_WIDTH, paddle.yPos - PADDLE_HALF_HEIGHT,
+    )
+
+    if (res.collision) {
         if (keys[KEY_ARROW_LEFT]) {
             ball.xDir = BALL_DIR_120.x;
             ball.yDir = BALL_DIR_120.y;
@@ -771,7 +809,7 @@ function checkForPaddleBallCollision() {
             ball.yDir = BALL_DIR_45.y;
         }
 
-        ball.yPos = paddle.yPos + PADDLE_HEIGHT + BALL_HALF_RADIUS;
+        ball.yPos = paddle.yPos + PADDLE_HALF_HEIGHT + BALL_RADIUS;
         ball.prevYPos = paddle.yPos;
     }
 }
@@ -888,7 +926,7 @@ function drawPlayerPaddle() {
 }
 
 function drawBall() {
-    drawRect(ball.xPos, ball.yPos, BALL_RADIUS, BALL_RADIUS, COLORS.red);
+    drawRect(ball.xPos, ball.yPos, BALL_WIDTH, BALL_HEIGHT, COLORS.red);
 }
 
 /** 
