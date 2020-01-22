@@ -280,19 +280,16 @@ function setup() {
         }
     }
 
-    reset();
+    resetGame();
 
     requestAnimationFrame(update);
 
     console.log(">>> webgl-breakout start! <<<");
 }
 
-function reset() {
+function resetGame() {
 
     DEBUG_MODE = false;
-
-    resetKeysAndPaddleAndBall();
-    resetBricks();
 
     WORLD_MAX_X = 0 + gl.canvas.clientWidth / 2.0;
 
@@ -310,6 +307,8 @@ function reset() {
     curBallsLeft = 3;    
     curLevel = 1;
     curPoints = 0;
+
+    initLevel();
 }
 
 function resetBricks() {
@@ -323,7 +322,9 @@ function resetBricks() {
     }
 
     curBricksLeft = MAX_BRICKS;
+}
 
+function resetBallVars() {
     // reset ball speed vars
     curHits = 0;
     curBallSpeed = 0;
@@ -342,6 +343,11 @@ function resetKeysAndPaddleAndBall() {
     ball.prevYPos = ball.yPos;
 }
 
+function initLevel() {
+    resetBricks();
+    resetBallVars();
+    resetKeysAndPaddleAndBall();
+}
 
 let BALL_SPEED = [
     180.0,
@@ -352,7 +358,6 @@ let BALL_SPEED = [
 ];
 
 const PADDLE_SPEED = 180.0;
-
 
 const PADDLE_WIDTH = 40.0;
 const PADDLE_HEIGHT = 5.0;
@@ -666,7 +671,7 @@ function doMainMenu() {
     }
 
     if (keys[KEY_SPACE]) {
-        reset();
+        resetGame();
         gameState = GAME_STATE_START;
         curBallsLeft--;
         keys[KEY_SPACE] = false;
@@ -679,7 +684,7 @@ function doGameOver() {
     ctx.fillText(GAME_OVER_TEXT, TEXT_CENTER_X - GAME_OVER_TEXT_OFFSET, TEXT_CENTER_Y);
     gameTimer -= dt;
     if (gameTimer < 0.0 || keys[KEY_SPACE]) {
-        reset();
+        resetGame();
         gameState = GAME_STATE_MAIN_MENU;
         keys[KEY_SPACE] = false;
         console.log(">>> GAME MENU <<<");
@@ -704,7 +709,7 @@ function doGame() {
     // check for quit
     //
     if (keys[KEY_Q]) {
-        reset();
+        resetGame();
         gameState = GAME_STATE_MAIN_MENU;
     }
 
@@ -892,8 +897,7 @@ function checkForNextLevelOrGameOver() {
         if (curLevel > 99) {
             curLevel = 99;
         }
-        resetBricks();
-        resetKeysAndPaddleAndBall();
+        initLevel();
         console.log(">>> NEXT LEVEL ")
     }
 
