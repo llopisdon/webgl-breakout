@@ -332,15 +332,15 @@ function resetBallVars() {
 
 function resetKeysAndPaddleAndBall() {
     GAME_KEYS.forEach(key => keys[key] = false);
-    paddle.xPos = 0.0;
-    paddle.yPos = 0.0 - gl.canvas.clientHeight / 2.0 + BRICK_HEIGHT;
-    paddle.prevXPos = paddle.xPos;
-    paddle.prevYPos = paddle.yPos;
+    paddle.x = 0.0;
+    paddle.y = 0.0 - gl.canvas.clientHeight / 2.0 + BRICK_HEIGHT;
+    paddle.prevX = paddle.x;
+    paddle.prevY = paddle.y;
 
-    ball.xPos = paddle.xPos;
-    ball.yPos = paddle.yPos + PADDLE_HALF_HEIGHT + BALL_RADIUS;
-    ball.prevXPos = ball.xPos;
-    ball.prevYPos = ball.yPos;
+    ball.x = paddle.x;
+    ball.y = paddle.y + PADDLE_HALF_HEIGHT + BALL_RADIUS;
+    ball.prevX = ball.x;
+    ball.prevY = ball.y;
 }
 
 function initLevel() {
@@ -389,20 +389,21 @@ let BRICK_HEIGHT = 10.0;
 let BRICK_HALF_HEIGHT = BRICK_HEIGHT / 2.0;
 
 let paddle = {
-    xPos: 0.0,
-    yPos: 0.0,
-    prevXPos: 0.0,
-    prevYPos: 0.0,
-    dir: 0.0
+    x: 0.0,
+    y: 0.0,
+    prevX: 0.0,
+    prevY: 0.0,
+    vx: 0.0,
+    vy: 0.0,
 }
 
 let ball = {
-    xPos: 0.0,
-    yPos: 0.0,
-    prevXPos: 0.0,
-    prevYPos: 0.0,
-    dirX: 1.0,
-    dirY: 1.0,
+    x: 0.0,
+    y: 0.0,
+    prevX: 0.0,
+    prevY: 0.0,
+    vx: 0.0,
+    vy: 0.0,
 }
 
 let bricks = [
@@ -658,6 +659,20 @@ function circleIntersectRect(cx, cy, radius, left, top, right, bottom) {
 }
 
 
+/**
+ * https://lamberta.github.io/html5-animation/
+ * 
+ * @param {*} rectA 
+ * @param {*} rectB 
+ */
+function didRectIntersect(rectA, rectB) {
+    return !(rectA.x + rectA.width < rectB.x ||
+        rectB.x + rectB.width < rectA.x ||
+        rectA.y + rectA.height < rectB.y ||
+        rectB.y + rectB.height < rectA.y);
+}
+
+
 function doMainMenu() {
     drawBackground();
 
@@ -757,9 +772,9 @@ function checkForBrickCollisions() {
                 }
                 
                 if (ball.yDir > 0.0) {
-                    ball.yPos = brickY - BRICK_HALF_HEIGHT - PADDLE_HALF_HEIGHT;
+                    ball.y = brickY - BRICK_HALF_HEIGHT - PADDLE_HALF_HEIGHT;
                 } else {
-                    ball.yPos = brickY + BRICK_HALF_HEIGHT + PADDLE_HALF_HEIGHT;
+                    ball.y = brickY + BRICK_HALF_HEIGHT + PADDLE_HALF_HEIGHT;
                 }
                 ball.yDir *= -1;
 
@@ -778,8 +793,8 @@ function checkForBrickCollisions() {
 
 function checkForBrickCollision(row, brick, brickX, brickY) {
     let res = circleIntersectRect(
-        ball.xPos,
-        ball.yPos,
+        ball.x,
+        ball.y,
         BALL_RADIUS,
         brickX - BRICK_HALF_WIDTH, brickY + BRICK_HALF_HEIGHT,
         brickX + BRICK_HALF_WIDTH, brickY - BRICK_HALF_HEIGHT
@@ -791,11 +806,11 @@ function checkForBrickCollision(row, brick, brickX, brickY) {
 function checkForPaddleBallCollision() {
 
     let res = circleIntersectRect(
-        ball.xPos,
-        ball.yPos,
+        ball.x,
+        ball.y,
         BALL_RADIUS,
-        paddle.prevXPos - PADDLE_HALF_WIDTH, paddle.prevYPos + PADDLE_HALF_HEIGHT,
-        paddle.xPos + PADDLE_HALF_WIDTH, paddle.yPos - PADDLE_HALF_HEIGHT,
+        paddle.prevX - PADDLE_HALF_WIDTH, paddle.prevY + PADDLE_HALF_HEIGHT,
+        paddle.x + PADDLE_HALF_WIDTH, paddle.y - PADDLE_HALF_HEIGHT,
     )
 
     if (res.collision) {
@@ -814,30 +829,30 @@ function checkForPaddleBallCollision() {
             ball.yDir = BALL_DIR_45.y;
         }
 
-        ball.yPos = paddle.yPos + PADDLE_HALF_HEIGHT + BALL_RADIUS;
-        ball.prevYPos = paddle.yPos;
+        ball.y = paddle.y + PADDLE_HALF_HEIGHT + BALL_RADIUS;
+        ball.prevY = paddle.y;
     }
 }
 
 function movePlayer() {
-    paddle.prevXPos = paddle.xPos;
-    paddle.prevYPos = paddle.yPos;
+    paddle.prevX = paddle.x;
+    paddle.prevY = paddle.y;
 
     if (keys[KEY_ARROW_RIGHT]) {
-        paddle.dir = 1.0;
+        paddle.vx = 1.0;
     } else if (keys[KEY_ARROW_LEFT]) {
-        paddle.dir = -1.0;
+        paddle.vx = -1.0;
     } else {
-        paddle.dir = 0.0;
+        paddle.vx = 0.0;
     }
 
-    paddle.xPos = paddle.xPos + (paddle.dir * PADDLE_SPEED * dt);
+    paddle.x = paddle.x + (paddle.vx * PADDLE_SPEED * dt);
 
-    if (paddle.xPos < -MAX_PADDLE_X) {
-        paddle.xPos = -MAX_PADDLE_X;
+    if (paddle.x < -MAX_PADDLE_X) {
+        paddle.x = -MAX_PADDLE_X;
     }
-    else if (paddle.xPos > MAX_PADDLE_X) {
-        paddle.xPos = MAX_PADDLE_X;
+    else if (paddle.x > MAX_PADDLE_X) {
+        paddle.x = MAX_PADDLE_X;
     }
 
     if (gameState === GAME_STATE_START && keys[KEY_SPACE]) {
@@ -849,40 +864,40 @@ function movePlayer() {
 
 function moveBall() {
     if (gameState === GAME_STATE_PLAY) {
-        ball.prevXPos = ball.xPos;
-        ball.prevYPos = ball.yPos;
+        ball.prevX = ball.x;
+        ball.prevY = ball.y;
 
-        ball.xPos = ball.xPos + (ball.xDir * BALL_SPEED[curBallSpeed] * dt);
-        ball.yPos = ball.yPos + (ball.yDir * BALL_SPEED[curBallSpeed] * dt);
+        ball.x = ball.x + (ball.xDir * BALL_SPEED[curBallSpeed] * dt);
+        ball.y = ball.y + (ball.yDir * BALL_SPEED[curBallSpeed] * dt);
 
-        if (ball.xPos < -MAX_BALL_X) {
-            ball.xPos = -MAX_BALL_X;
+        if (ball.x < -MAX_BALL_X) {
+            ball.x = -MAX_BALL_X;
             ball.xDir = -ball.xDir;
         }
-        else if (ball.xPos > MAX_BALL_X) {
-            ball.xPos = MAX_BALL_X;
+        else if (ball.x > MAX_BALL_X) {
+            ball.x = MAX_BALL_X;
             ball.xDir = -ball.xDir;
         }
 
-        if (ball.yPos < -MAX_BALL_Y) {            
+        if (ball.y < -MAX_BALL_Y) {            
             if (!DEBUG_MODE) {
                 gameState = GAME_STATE_START;
                 curBallsLeft--;
                 resetKeysAndPaddleAndBall();
             } else {
-                ball.yPos = -MAX_BALL_Y;
+                ball.y = -MAX_BALL_Y;
                 ball.yDir = -ball.yDir;    
             }
         }
-        else if (ball.yPos > MAX_BALL_Y) {
-            ball.yPos = MAX_BALL_Y;
+        else if (ball.y > MAX_BALL_Y) {
+            ball.y = MAX_BALL_Y;
             ball.yDir = -ball.yDir;
         }
     } else if (gameState == GAME_STATE_START) {
-        ball.prevXPos = ball.xPos;
-        ball.prevYPos = ball.yPos;
-        ball.xPos = paddle.xPos;
-        ball.yPos = ball.yPos;
+        ball.prevX = ball.x;
+        ball.prevY = ball.y;
+        ball.x = paddle.x;
+        ball.y = ball.y;
     }
 }
 
@@ -926,11 +941,11 @@ function drawBrick(centerX, centerY, color) {
 }
 
 function drawPlayerPaddle() {
-    drawRect(paddle.xPos, paddle.yPos, PADDLE_WIDTH, PADDLE_HEIGHT, COLORS.red);
+    drawRect(paddle.x, paddle.y, PADDLE_WIDTH, PADDLE_HEIGHT, COLORS.red);
 }
 
 function drawBall() {
-    drawRect(ball.xPos, ball.yPos, BALL_WIDTH, BALL_HEIGHT, COLORS.red);
+    drawRect(ball.x, ball.y, BALL_WIDTH, BALL_HEIGHT, COLORS.red);
 }
 
 /** 
