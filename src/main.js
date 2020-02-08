@@ -822,16 +822,14 @@ function checkForBrickCollisions() {
                 }
                 
                 ball.prevY = ball.y;
-                if (ball.vy > 0.0) {
-                    ball.y = brickY - BRICK_HALF_HEIGHT - PADDLE_HALF_HEIGHT;
-                } else {
-                    ball.y = brickY + BRICK_HALF_HEIGHT + PADDLE_HALF_HEIGHT;
-                }
+                // if (ball.vy > 0.0) {
+                //     ball.y = brickY - BRICK_HALF_HEIGHT - PADDLE_HALF_HEIGHT;
+                // } else {
+                //     ball.y = brickY + BRICK_HALF_HEIGHT + PADDLE_HALF_HEIGHT;
+                // }
                 ball.vy *= -1;
 
                 ballRect = ball.bounds();
-
-                console.log("prevBallSpeed: " + curBallSpeed);
 
                 if (curHits === 4 || curHits === 12 || (curBallSpeed < 3 && row === 4) || (curBallSpeed < 4 && row === 5)) {
                     curBallSpeed++;
@@ -840,8 +838,6 @@ function checkForBrickCollisions() {
                 if (curBallSpeed >= BALL_SPEED.length) {
                     curBallSpeed = BALL_SPEED.length - 1;
                 }
-
-                console.log("curBallSpeed: " + curBallSpeed);
 
                 return;
             }
@@ -871,9 +867,6 @@ function checkForPaddleBallCollision() {
             }
             ball.vy = BALL_DIR_45.y;
         }
-
-
-
     }
 }
 
