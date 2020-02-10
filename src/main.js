@@ -847,6 +847,58 @@ function checkForBrickCollisions() {
 
 
 function checkForPaddleBallCollision() {
+
+    if (!rectsIntersect(paddle.bounds(), ball.bounds())) {
+        return;
+    }
+
+    // paddle top
+
+    {
+        let pX = paddle.x;
+        let pY = paddle.y + PADDLE_HALF_HEIGHT;
+        let theta = 0.0;
+        let x1 = ball.x - pX
+        let y1 = ball.y - pY;
+        let cos = Math.cos(theta);
+        let sin = Math.sin(theta);
+        let y2 = x1 * sin + y1 * cos;
+
+    
+        if (y2 < -BALL_RADIUS) {
+
+            console.log(`y1: ${y1} y2: ${y2} radius: ${-BALL_RADIUS}`);
+
+            let x2 = x1 * cos - y1 * sin;
+        
+            let vx1 = ball.vx * cos - ball.vy * sin;
+            let vy1 = ball.vx * sin + ball.vy * cos;
+
+            y2 = -BALL_RADIUS;
+            vy1 *= -1.0;
+
+            // TODO apply rotation based on paddle movement
+
+            console.log(`vx: ${ball.vx} vx1: ${vx1}`);
+            console.log(`vy: ${ball.vy} vy1: ${vy1}`);
+
+            x1 = x2 * cos + y2 * sin;
+            y1 = -x2 * sin + y2 * cos;
+
+            ball.vx = vx1 * cos + vy1 * sin;
+            ball.vy = -vx1 * sin + vy1 * cos;
+
+            ball.x = pX + x1;
+            ball.y = pY + y1;
+
+            return;
+        }
+    }
+
+
+    // TODO handle collision against other sides
+
+    /*
     if (rectsIntersect(paddle.bounds(), ball.bounds())) {
         ball.y = paddle.y + PADDLE_HEIGHT;
         ball.prevY = paddle.y;
@@ -868,7 +920,12 @@ function checkForPaddleBallCollision() {
             ball.vy = BALL_DIR_45.y;
         }
     }
+    */
 }
+
+
+
+
 
 function movePlayer() {
     paddle.prevX = paddle.x;
