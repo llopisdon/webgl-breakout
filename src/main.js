@@ -927,6 +927,7 @@ function checkForPaddleBallCollision() {
  * 
  * see:
  * https://lamberta.github.io/html5-animation/examples/ch10/10-multi-angle-bounce.html
+ * https://en.wikipedia.org/wiki/Rotation_of_axes
  * 
  * @param {number} cx object x position in world coordinates
  * @param {number} cy object y position in world coordinates
