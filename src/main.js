@@ -304,7 +304,7 @@ function resetGame() {
     gameTimer = 0;
     blink = BLINK_RATE;
 
-    curBallsLeft = 3;    
+    curBallsLeft = 3;
     curLevel = 1;
     curPoints = 0;
 
@@ -397,7 +397,7 @@ const paddle = {
     prevY: 0.0,
     vx: 0.0,
     vy: 0.0,
-    bounds: function() {
+    bounds: function () {
         return {
             rx: this.x - PADDLE_HALF_WIDTH,
             ry: this.y + PADDLE_HALF_HEIGHT,
@@ -414,12 +414,12 @@ const ball = {
     prevY: 0.0,
     vx: 0.0,
     vy: 0.0,
-    bounds: function() {
+    bounds: function () {
         return {
             rx: this.x - BALL_RADIUS,
             ry: this.y + BALL_RADIUS,
             width: BALL_WIDTH,
-            height: BALL_HEIGHT    
+            height: BALL_HEIGHT
         }
     }
 }
@@ -672,7 +672,7 @@ function circleIntersectRect(cx, cy, radius, left, top, right, bottom) {
     let distX = cx - testX;
     let distY = cy - testY;
     let dist = Math.sqrt((distX * distX) + (distY * distY));
-    
+
     let collision = dist <= radius;
     let diff = 0.0;
     if (collision) {
@@ -691,8 +691,8 @@ function circleIntersectRect(cx, cy, radius, left, top, right, bottom) {
  * @return {boolean}
  */
 function rectsIntersect(rectA, rectB) {
-    return !(rectA.rx + rectA.width < rectB.rx || 
-        rectB.rx + rectB.width < rectA.rx || 
+    return !(rectA.rx + rectA.width < rectB.rx ||
+        rectB.rx + rectB.width < rectA.rx ||
         rectA.ry - rectA.height > rectB.ry ||
         rectB.ry - rectB.height > rectA.ry);
 }
@@ -759,7 +759,7 @@ function doGame() {
     if (gameState == GAME_STATE_GAME_OVER) {
         return;
     }
-  
+
     //
     // check for quit
     //
@@ -787,13 +787,13 @@ function doGame() {
     // draw score, balls left, cur level
     //
 
-    ctx.fillText(curBallsLeft, GAME_WIDTH - PADDING_16 - PADDING_4, 
+    ctx.fillText(curBallsLeft, GAME_WIDTH - PADDING_16 - PADDING_4,
         PADDING_16 + PADDING_4);
 
-    ctx.fillText(`${curLevel}`.padStart(2, "0"), GAME_WIDTH - (PADDING_16 * 4) - PADDING_4, 
-            PADDING_16 + PADDING_4);
-    
-    ctx.fillText(`${curPoints}`.padStart(4, "0"), PADDING_4, 
+    ctx.fillText(`${curLevel}`.padStart(2, "0"), GAME_WIDTH - (PADDING_16 * 4) - PADDING_4,
+        PADDING_16 + PADDING_4);
+
+    ctx.fillText(`${curPoints}`.padStart(4, "0"), PADDING_4,
         PADDING_16 + PADDING_4);
 }
 
@@ -808,26 +808,26 @@ function checkForBrickCollisions() {
 
     let ballRect = ball.bounds();
 
-    for (let row=0; row<6; row++) {
+    for (let row = 0; row < 6; row++) {
 
-        let brickY =  BRICK_START_Y + (BRICK_HEIGHT * row);
+        let brickY = BRICK_START_Y + (BRICK_HEIGHT * row);
 
         for (let brick = 0, x = BRICK_START_X; brick < MAX_BRICKS_PER_ROW; brick++ , x += BRICK_WIDTH) {
-            
+
             brickRect.rx = x - BRICK_HALF_WIDTH;
             brickRect.ry = brickY + BRICK_HALF_HEIGHT;
 
-            if (bricks[row][brick] && rectsIntersect(ballRect, brickRect)){
+            if (bricks[row][brick] && rectsIntersect(ballRect, brickRect)) {
 
                 bricks[row][brick] = false;
                 curBricksLeft--;
                 curHits++;
-                
+
                 curPoints += POINTS[row];
                 if (curPoints > 9999) {
                     curPoints = 9999;
                 }
-                
+
                 ball.prevY = ball.y;
                 // if (ball.vy > 0.0) {
                 //     ball.y = brickY - BRICK_HALF_HEIGHT - PADDLE_HALF_HEIGHT;
@@ -859,176 +859,99 @@ function checkForPaddleBallCollision() {
         return;
     }
 
+    // paddle top
     if (didLineSegmentsIntersect(
         ball.x, ball.y, ball.prevX, ball.prevY,
         paddle.x - PADDLE_HALF_WIDTH, paddle.y + PADDLE_HALF_HEIGHT,
-        paddle.x + PADDLE_HALF_WIDTH, paddle.y + PADDLE_HALF_HEIGHT,
-    ))    
+        paddle.x + PADDLE_HALF_WIDTH, paddle.y + PADDLE_HALF_HEIGHT)
+        && 
+        bounce(paddle.x, paddle.y + PADDLE_HALF_HEIGHT, 0.0)) 
     {
-        let pX = paddle.x;
-        let pY = paddle.y + PADDLE_HALF_HEIGHT;
-        let theta = 0.0;
-        let x1 = ball.x - pX
-        let y1 = ball.y - pY;
-
-        let cos = Math.cos(theta);
-        let sin = Math.sin(theta);
-        let y2 = -x1 * sin + y1 * cos;
-
-        if (y2 < 0.0) {
-
-            let x2 = x1 * cos + y1 * sin;
-        
-            let vx1 = ball.vx * cos + ball.vy * sin;
-            let vy1 = -ball.vx * sin + ball.vy * cos;
-
-            y2 = BALL_RADIUS;
-            vy1 *= -1.0;
-
-            x1 = x2 * cos - y2 * sin;
-            y1 = x2 * sin + y2 * cos;
-
-            if (keys[KEY_ARROW_LEFT]) {
-                ball.vx = BALL_DIR_120.x;
-                ball.vy = BALL_DIR_120.y;
-            } else if (keys[KEY_ARROW_RIGHT]) {
-                ball.vx = BALL_DIR_60.x;
-                ball.vy = BALL_DIR_60.y;
+        if (keys[KEY_ARROW_LEFT]) {
+            ball.vx = BALL_DIR_120.x;
+            ball.vy = BALL_DIR_120.y;
+        } else if (keys[KEY_ARROW_RIGHT]) {
+            ball.vx = BALL_DIR_60.x;
+            ball.vy = BALL_DIR_60.y;
+        } else {
+            if (ball.vx < 0.0) {
+                ball.vx = BALL_DIR_135.x;
             } else {
-                if (ball.vx < 0.0) {
-                    ball.vx = BALL_DIR_135.x;
-                } else {
-                    ball.vx = BALL_DIR_45.x;
-                }
-                ball.vy = BALL_DIR_45.y;
+                ball.vx = BALL_DIR_45.x;
             }
-    
-            ball.x = pX + x1;
-            ball.y = pY + y1;
-
-            return;
+            ball.vy = BALL_DIR_45.y;
         }
+
+        return;
     }
 
     // paddle left
     if (didLineSegmentsIntersect(
         ball.x, ball.y, ball.prevX, ball.prevY,
         paddle.x - PADDLE_HALF_WIDTH, paddle.y + PADDLE_HALF_HEIGHT,
-        paddle.x - PADDLE_HALF_WIDTH, paddle.y - PADDLE_HALF_HEIGHT,
-    ))    
+        paddle.x - PADDLE_HALF_WIDTH, paddle.y - PADDLE_HALF_HEIGHT)
+        &&
+        bounce(paddle.x - PADDLE_HALF_WIDTH, paddle.y, PI_OVER_2)) 
     {
-        let pX = paddle.x - PADDLE_HALF_WIDTH;
-        let pY = paddle.y;
-        let theta = PI_OVER_2;
-        let x1 = ball.x - pX
-        let y1 = ball.y - pY;
-
-        let cos = Math.cos(theta);
-        let sin = Math.sin(theta);
-        let y2 = -x1 * sin + y1 * cos;
-
-        if (y2 < 0.0) {
-            let x2 = x1 * cos + y1 * sin;
-        
-            let vx1 = ball.vx * cos + ball.vy * sin;
-            let vy1 = -ball.vx * sin + ball.vy * cos;
-
-            y2 = BALL_RADIUS;
-            vy1 *= -1.0;
-
-            x1 = x2 * cos - y2 * sin;
-            y1 = x2 * sin + y2 * cos;
-
-            ball.vx = vx1 * cos - vy1 * sin;
-            ball.vy = vx1 * sin + vy1 * cos;
-
-            ball.x = pX + x1;
-            ball.y = pY + y1;
-
-            return;
-        }
+        return;
     }
 
     // paddle right
     if (didLineSegmentsIntersect(
         ball.x, ball.y, ball.prevX, ball.prevY,
         paddle.x + PADDLE_HALF_WIDTH, paddle.y + PADDLE_HALF_HEIGHT,
-        paddle.x + PADDLE_HALF_WIDTH, paddle.y - PADDLE_HALF_HEIGHT,
-    ))
+        paddle.x + PADDLE_HALF_WIDTH, paddle.y - PADDLE_HALF_HEIGHT)
+        &&
+        bounce(paddle.x + PADDLE_HALF_WIDTH, paddle.y, -PI_OVER_2))
     {
-        let pX = paddle.x + PADDLE_HALF_WIDTH;
-        let pY = paddle.y;
-        let theta = -PI_OVER_2;
-        let x1 = ball.x - pX
-        let y1 = ball.y - pY;
-
-        let cos = Math.cos(theta);
-        let sin = Math.sin(theta);
-        let y2 = -x1 * sin + y1 * cos;
-
-        if (y2 < 0.0) {
-
-            let x2 = x1 * cos + y1 * sin;
-        
-            let vx1 = ball.vx * cos + ball.vy * sin;
-            let vy1 = -ball.vx * sin + ball.vy * cos;
-
-            y2 = BALL_RADIUS;
-            vy1 *= -1.0;
-
-            x1 = x2 * cos - y2 * sin;
-            y1 = x2 * sin + y2 * cos;
-
-            ball.vx = vx1 * cos - vy1 * sin;
-            ball.vy = vx1 * sin + vy1 * cos;
-
-            ball.x = pX + x1;
-            ball.y = pY + y1;
-
-            return;
-        }
+        return;
     }
 
-
-    if (didLineSegmentsIntersect(
-        ball.x, ball.y, ball.prevX, ball.prevY,
-        paddle.x - PADDLE_HALF_WIDTH, paddle.y - PADDLE_HALF_HEIGHT,
-        paddle.x + PADDLE_HALF_WIDTH, paddle.y - PADDLE_HALF_HEIGHT,
-    ))    
-    {
-        let pX = paddle.x;
-        let pY = paddle.y - PADDLE_HALF_HEIGHT;
-        let theta = 0.0;
-        let x1 = ball.x - pX
-        let y1 = ball.y - pY;
-
-        let cos = Math.cos(theta);
-        let sin = Math.sin(theta);
-        let y2 = -x1 * sin + y1 * cos;
-
-        if (y2 < 0.0) {
-
-            let x2 = x1 * cos + y1 * sin;
-        
-            let vx1 = ball.vx * cos + ball.vy * sin;
-            let vy1 = -ball.vx * sin + ball.vy * cos;
-
-            y2 = BALL_RADIUS;
-            vy1 *= -1.0;
-
-            x1 = x2 * cos - y2 * sin;
-            y1 = x2 * sin + y2 * cos;
-
-            ball.vx = vx1 * cos - vy1 * sin;
-            ball.vy = vx1 * sin + vy1 * cos;
-
-            ball.x = pX + x1;
-            ball.y = pY + y1;
-
-            return;
-        }
+    // paddle bottom
+    if (
+        didLineSegmentsIntersect(
+            ball.x, ball.y, ball.prevX, ball.prevY,
+            paddle.x - PADDLE_HALF_WIDTH, paddle.y - PADDLE_HALF_HEIGHT,
+            paddle.x + PADDLE_HALF_WIDTH, paddle.y - PADDLE_HALF_HEIGHT)
+        && 
+        bounce(paddle.x, paddle.y - PADDLE_HALF_HEIGHT, THREE_PI_OVER_2)
+    ) {
+        return;
     }
 }
+
+function bounce(cx, cy, theta) {
+    let x1 = ball.x - cx
+    let y1 = ball.y - cy;
+
+    let cos = Math.cos(theta);
+    let sin = Math.sin(theta);
+    let y2 = -x1 * sin + y1 * cos;
+
+    if (y2 > 0.0) {
+        return false;
+    }
+
+    let x2 = x1 * cos + y1 * sin;
+
+    let vx1 = ball.vx * cos + ball.vy * sin;
+    let vy1 = -ball.vx * sin + ball.vy * cos;
+
+    y2 = BALL_RADIUS;
+    vy1 *= -1.0;
+
+    x1 = x2 * cos - y2 * sin;
+    y1 = x2 * sin + y2 * cos;
+
+    ball.vx = vx1 * cos - vy1 * sin;
+    ball.vy = vx1 * sin + vy1 * cos;
+
+    ball.x = cx + x1;
+    ball.y = cy + y1;
+
+    return true;
+}
+
 
 function movePlayer() {
     paddle.prevX = paddle.x;
@@ -1075,14 +998,14 @@ function moveBall() {
             ball.vx = -ball.vx;
         }
 
-        if (ball.y < -MAX_BALL_Y) {            
+        if (ball.y < -MAX_BALL_Y) {
             if (!DEBUG_MODE) {
                 gameState = GAME_STATE_START;
                 curBallsLeft--;
                 resetKeysAndPaddleAndBall();
             } else {
                 ball.y = -MAX_BALL_Y;
-                ball.vy = -ball.vy;    
+                ball.vy = -ball.vy;
             }
         }
         else if (ball.y > MAX_BALL_Y) {
