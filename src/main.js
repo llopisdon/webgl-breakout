@@ -817,7 +817,36 @@ function checkForBrickCollisions() {
             brickRect.rx = x - BRICK_HALF_WIDTH;
             brickRect.ry = brickY + BRICK_HALF_HEIGHT;
 
-            if (bricks[row][brick] && rectsIntersect(ballRect, brickRect)) {
+            if (bricks[row][brick] 
+                && rectsIntersect(ballRect, brickRect)) {
+
+                if (didLineSegmentIntersectRect(
+                    ball.x, ball.y, ball.prevX, ball.prevY,
+                    x - BRICK_HALF_WIDTH, brickY - BRICK_HALF_HEIGHT,
+                    x + BRICK_HALF_WIDTH, brickY - BRICK_HALF_HEIGHT)) {
+
+                    bounce(x, brickY - BRICK_HALF_HEIGHT, THREE_PI_OVER_2);                    
+
+                } else if (didLineSegmentIntersectRect(
+                    ball.x, ball.y, ball.prevX, ball.prevY,
+                    x - BRICK_HALF_WIDTH, brickY + BRICK_HALF_HEIGHT,
+                    x - BRICK_HALF_WIDTH, brickY - BRICK_HALF_HEIGHT)
+                ) {
+
+                    bounce(x - BRICK_HALF_WIDTH, brickY, PI_OVER_2);                    
+
+
+                } else if (didLineSegmentIntersectRect(
+                    ball.x, ball.y, ball.prevX, ball.prevY,
+                    x + BRICK_HALF_WIDTH, brickY + BRICK_HALF_HEIGHT,
+                    x + BRICK_HALF_WIDTH, brickY - BRICK_HALF_HEIGHT)) {
+
+                    bounce(x + BRICK_HALF_WIDTH, brickY, -PI_OVER_2);                    
+    
+                } else {
+                    // TOP
+                    bounce(x, brickY + BRICK_HALF_HEIGHT, 0.0);                    
+                }
 
                 bricks[row][brick] = false;
                 curBricksLeft--;
@@ -828,14 +857,7 @@ function checkForBrickCollisions() {
                     curPoints = 9999;
                 }
 
-                ball.prevY = ball.y;
-                // if (ball.vy > 0.0) {
-                //     ball.y = brickY - BRICK_HALF_HEIGHT - PADDLE_HALF_HEIGHT;
-                // } else {
-                //     ball.y = brickY + BRICK_HALF_HEIGHT + PADDLE_HALF_HEIGHT;
-                // }
-                ball.vy *= -1;
-
+                // update ball rect after collision
                 ballRect = ball.bounds();
 
                 if (curHits === 4 || curHits === 12 || (curBallSpeed < 3 && row === 4) || (curBallSpeed < 4 && row === 5)) {
@@ -958,6 +980,9 @@ function bounce(cx, cy, theta) {
 
     ball.vx = vx1 * cos - vy1 * sin;
     ball.vy = vx1 * sin + vy1 * cos;
+
+    ball.prevX = ball.x;
+    ball.prevY = ball.y;
 
     ball.x = cx + x1;
     ball.y = cy + y1;
