@@ -919,7 +919,19 @@ function checkForPaddleBallCollision() {
         return;
     }
 }
-
+/**
+ * Determine if ball and object collide. If so bounce the ball
+ * in the opposite direction. Works by rotating the ball in to
+ * the coordinate system of the object and comparing the rotated
+ * y coodinate relative to a level ball.
+ * 
+ * see:
+ * https://lamberta.github.io/html5-animation/examples/ch10/10-multi-angle-bounce.html
+ * 
+ * @param {number} cx object x position in world coordinates
+ * @param {number} cy object y position in world coordinates
+ * @param {number} theta object rotation in world
+ */
 function bounce(cx, cy, theta) {
     let x1 = ball.x - cx
     let y1 = ball.y - cy;
