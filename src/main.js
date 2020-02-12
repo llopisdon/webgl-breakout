@@ -1142,7 +1142,7 @@ function drawPlayerPaddle() {
 }
 
 function drawBall() {
-    drawRect(ball.x, ball.y, BALL_WIDTH, BALL_HEIGHT, COLORS.cyan);
+    drawRect(ball.x, ball.y, BALL_WIDTH, BALL_HEIGHT, COLORS.red);
 }
 
 /** 
