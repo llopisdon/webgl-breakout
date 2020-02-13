@@ -567,7 +567,7 @@ function getRandomIntInclusive(min, max) {
 function didLineSegmentsIntersect(x1, y1, x2, y2, x3, y3, x4, y4) {
 
 
-    // console.log(`x1: ${x1} y1: ${y1} x2: ${x2} y2: ${y2} x3: ${x3} y3: ${y3} x4: ${x4} y4: ${y4}`);
+    // console.log(`~~~ x1: ${x1} y1: ${y1} x2: ${x2} y2: ${y2} x3: ${x3} y3: ${y3} x4: ${x4} y4: ${y4}`);
 
     let x4x3 = x4 - x3;
     let y1y3 = y1 - y3;
@@ -576,8 +576,12 @@ function didLineSegmentsIntersect(x1, y1, x2, y2, x3, y3, x4, y4) {
     let x2x1 = x2 - x1;
     let y2y1 = y2 - y1;
 
+    // console.log(`x4x2: ${x4x3} y1y3: ${y1y3} y4y3: ${y4y3} x1x3: ${x1x3} x2x1: ${x2x1} y2y1: ${y2y1}`);
+
     let a = ((x4x3 * y1y3) - (y4y3 * x1x3)) / ((y4y3 * x2x1) - (x4x3 * y2y1));
     let b = ((x2x1 * y1y3) - (y2y1 * x1x3)) / ((y4y3 * x2x1) - (x4x3 * y2y1));
+
+    // console.log(`a: ${a} b: ${b}`);
 
     if (a >= 0 && a <= 1 && b >= 0 && b <= 1) {
         return true;
@@ -592,17 +596,21 @@ function didLineSegmentsIntersect(x1, y1, x2, y2, x3, y3, x4, y4) {
  * @param {*} y1 
  * @param {*} x2 
  * @param {*} y2 
- * @param {*} rect_left 
- * @param {*} rect_top 
- * @param {*} rect_right 
- * @param {*} rect_bottom 
+ * @param {*} rect
  */
-function didLineSegmentIntersectRect(x1, y1, x2, y2, rect_left, rect_top, rect_right, rect_bottom) {
+function didLineSegmentIntersectRect(x1, y1, x2, y2, rect) {
+
+    // console.log(rect);
+    // console.log(`${x1} ${y1} ${x2} ${y2}`);
+    let left = rect.rx;
+    let right = rect.rx + rect.width;
+    let top = rect.ry;
+    let bottom = rect.ry + rect.width;
 
     // bottom
     if (didLineSegmentsIntersect(
         x1, y1, x2, y2,
-        rect_left, rect_bottom, rect_right, rect_bottom,
+        left, bottom, right, bottom
     )) {
         return true;
     }
@@ -610,7 +618,7 @@ function didLineSegmentIntersectRect(x1, y1, x2, y2, rect_left, rect_top, rect_r
     // top
     if (didLineSegmentsIntersect(
         x1, y1, x2, y2,
-        rect_left, rect_top, rect_right, rect_top,
+        left, top, right, top
     )) {
         return true;
     }
@@ -618,7 +626,7 @@ function didLineSegmentIntersectRect(x1, y1, x2, y2, rect_left, rect_top, rect_r
     // left
     if (didLineSegmentsIntersect(
         x1, y1, x2, y2,
-        rect_left, rect_top, rect_left, rect_bottom,
+        left, top, left, bottom
     )) {
         return true;
     }
@@ -626,7 +634,7 @@ function didLineSegmentIntersectRect(x1, y1, x2, y2, rect_left, rect_top, rect_r
     // right
     if (didLineSegmentsIntersect(
         x1, y1, x2, y2,
-        rect_right, rect_top, rect_right, rect_bottom,
+        right, top, right, bottom
     )) {
         return true;
     }
@@ -820,33 +828,7 @@ function checkForBrickCollisions() {
             if (bricks[row][brick] 
                 && rectsIntersect(ballRect, brickRect)) {
 
-                if (didLineSegmentIntersectRect(
-                    ball.x, ball.y, ball.prevX, ball.prevY,
-                    x - BRICK_HALF_WIDTH, brickY - BRICK_HALF_HEIGHT,
-                    x + BRICK_HALF_WIDTH, brickY - BRICK_HALF_HEIGHT)) {
-
-                    bounce(x, brickY - BRICK_HALF_HEIGHT, THREE_PI_OVER_2);                    
-
-                } else if (didLineSegmentIntersectRect(
-                    ball.x, ball.y, ball.prevX, ball.prevY,
-                    x - BRICK_HALF_WIDTH, brickY + BRICK_HALF_HEIGHT,
-                    x - BRICK_HALF_WIDTH, brickY - BRICK_HALF_HEIGHT)
-                ) {
-
-                    bounce(x - BRICK_HALF_WIDTH, brickY, PI_OVER_2);                    
-
-
-                } else if (didLineSegmentIntersectRect(
-                    ball.x, ball.y, ball.prevX, ball.prevY,
-                    x + BRICK_HALF_WIDTH, brickY + BRICK_HALF_HEIGHT,
-                    x + BRICK_HALF_WIDTH, brickY - BRICK_HALF_HEIGHT)) {
-
-                    bounce(x + BRICK_HALF_WIDTH, brickY, -PI_OVER_2);                    
-    
-                } else {
-                    // TOP
-                    bounce(x, brickY + BRICK_HALF_HEIGHT, 0.0);                    
-                }
+                ball.vy *= -1;
 
                 bricks[row][brick] = false;
                 curBricksLeft--;
@@ -981,11 +963,11 @@ function bounce(cx, cy, theta) {
     ball.vx = vx1 * cos - vy1 * sin;
     ball.vy = vx1 * sin + vy1 * cos;
 
-    ball.prevX = ball.x;
-    ball.prevY = ball.y;
-
     ball.x = cx + x1;
     ball.y = cy + y1;
+
+    ball.prevX = ball.x;
+    ball.prevY = ball.y;
 
     return true;
 }
@@ -1024,8 +1006,12 @@ function moveBall() {
         ball.prevX = ball.x;
         ball.prevY = ball.y;
 
+        // console.log(`moveBall: x: ${ball.x} y: ${ball.y} prevX: ${ball.prevX} ${ball.prevY}`);
+
         ball.x = ball.x + (ball.vx * BALL_SPEED[curBallSpeed] * dt);
         ball.y = ball.y + (ball.vy * BALL_SPEED[curBallSpeed] * dt);
+
+        // console.log(`moveBall: x: ${ball.x} y: ${ball.y} prevX: ${ball.prevX} ${ball.prevY}`);
 
         if (ball.x < -MAX_BALL_X) {
             ball.x = -MAX_BALL_X;
