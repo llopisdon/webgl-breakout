@@ -567,7 +567,8 @@ function getRandomIntInclusive(min, max) {
 function didLineSegmentsIntersect(x1, y1, x2, y2, x3, y3, x4, y4) {
 
 
-    // console.log(`~~~ x1: ${x1} y1: ${y1} x2: ${x2} y2: ${y2} x3: ${x3} y3: ${y3} x4: ${x4} y4: ${y4}`);
+    if (gameState === GAME_STATE_PLAY)
+        console.log(`~~~ x1: ${x1} y1: ${y1} x2: ${x2} y2: ${y2} x3: ${x3} y3: ${y3} x4: ${x4} y4: ${y4}`);
 
     let x4x3 = x4 - x3;
     let y1y3 = y1 - y3;
@@ -576,12 +577,14 @@ function didLineSegmentsIntersect(x1, y1, x2, y2, x3, y3, x4, y4) {
     let x2x1 = x2 - x1;
     let y2y1 = y2 - y1;
 
-    // console.log(`x4x2: ${x4x3} y1y3: ${y1y3} y4y3: ${y4y3} x1x3: ${x1x3} x2x1: ${x2x1} y2y1: ${y2y1}`);
+    if (gameState === GAME_STATE_PLAY)
+        console.log(`x4x2: ${x4x3} y1y3: ${y1y3} y4y3: ${y4y3} x1x3: ${x1x3} x2x1: ${x2x1} y2y1: ${y2y1}`);
 
     let a = ((x4x3 * y1y3) - (y4y3 * x1x3)) / ((y4y3 * x2x1) - (x4x3 * y2y1));
     let b = ((x2x1 * y1y3) - (y2y1 * x1x3)) / ((y4y3 * x2x1) - (x4x3 * y2y1));
 
-    // console.log(`a: ${a} b: ${b}`);
+    if (gameState === GAME_STATE_PLAY)
+        console.log(`a: ${a} b: ${b}`);
 
     if (a >= 0 && a <= 1 && b >= 0 && b <= 1) {
         return true;
@@ -825,7 +828,7 @@ function checkForBrickCollisions() {
             brickRect.rx = x - BRICK_HALF_WIDTH;
             brickRect.ry = brickY + BRICK_HALF_HEIGHT;
 
-            if (bricks[row][brick] 
+            if (bricks[row][brick]
                 && rectsIntersect(ballRect, brickRect)) {
 
                 ball.vy *= -1;
@@ -868,9 +871,8 @@ function checkForPaddleBallCollision() {
         ball.x, ball.y, ball.prevX, ball.prevY,
         paddle.x - PADDLE_HALF_WIDTH, paddle.y + PADDLE_HALF_HEIGHT,
         paddle.x + PADDLE_HALF_WIDTH, paddle.y + PADDLE_HALF_HEIGHT)
-        && 
-        bounce(paddle.x, paddle.y + PADDLE_HALF_HEIGHT, 0.0)) 
-    {
+        &&
+        bounce(paddle.x, paddle.y + PADDLE_HALF_HEIGHT, 0.0)) {
         if (keys[KEY_ARROW_LEFT]) {
             ball.vx = BALL_DIR_120.x;
             ball.vy = BALL_DIR_120.y;
@@ -895,8 +897,7 @@ function checkForPaddleBallCollision() {
         paddle.x - PADDLE_HALF_WIDTH, paddle.y + PADDLE_HALF_HEIGHT,
         paddle.x - PADDLE_HALF_WIDTH, paddle.y - PADDLE_HALF_HEIGHT)
         &&
-        bounce(paddle.x - PADDLE_HALF_WIDTH, paddle.y, PI_OVER_2)) 
-    {
+        bounce(paddle.x - PADDLE_HALF_WIDTH, paddle.y, PI_OVER_2)) {
         return;
     }
 
@@ -906,8 +907,7 @@ function checkForPaddleBallCollision() {
         paddle.x + PADDLE_HALF_WIDTH, paddle.y + PADDLE_HALF_HEIGHT,
         paddle.x + PADDLE_HALF_WIDTH, paddle.y - PADDLE_HALF_HEIGHT)
         &&
-        bounce(paddle.x + PADDLE_HALF_WIDTH, paddle.y, -PI_OVER_2))
-    {
+        bounce(paddle.x + PADDLE_HALF_WIDTH, paddle.y, -PI_OVER_2)) {
         return;
     }
 
@@ -917,7 +917,7 @@ function checkForPaddleBallCollision() {
             ball.x, ball.y, ball.prevX, ball.prevY,
             paddle.x - PADDLE_HALF_WIDTH, paddle.y - PADDLE_HALF_HEIGHT,
             paddle.x + PADDLE_HALF_WIDTH, paddle.y - PADDLE_HALF_HEIGHT)
-        && 
+        &&
         bounce(paddle.x, paddle.y - PADDLE_HALF_HEIGHT, THREE_PI_OVER_2)
     ) {
         return;
@@ -945,14 +945,14 @@ function bounce(cx, cy, theta) {
     let sin = Math.sin(theta);
     let y2 = -x1 * sin + y1 * cos;
 
-    if (y2 > 0.0) {
+    let vy1 = -ball.vx * sin + ball.vy * cos;
+
+    if (y2 > 0.0 && y2 > vy1) {
         return false;
     }
 
-    let x2 = x1 * cos + y1 * sin;
-
     let vx1 = ball.vx * cos + ball.vy * sin;
-    let vy1 = -ball.vx * sin + ball.vy * cos;
+    let x2 = x1 * cos + y1 * sin;
 
     y2 = BALL_RADIUS;
     vy1 *= -1.0;
